@@ -1,0 +1,32 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Security Log — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_settings_tiles.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">SECURITY LOG</h1>
+<p class="mnx-sub">Your last 200 account activity events.</p>
+
+{% include "menntrix/_settings_tabs.html" %}
+
+{% for e in events %}
+<div class="mnx-log-row mnx-log-{{ e.severity }}">
+    <div class="mnx-log-badge">{{ e.severity|upper }}</div>
+    <div style="flex:1;min-width:0;">
+        <span class="mnx-row-name" style="display:block;color:#fff;">{{ e.event_type|upper }}</span>
+        <span style="font-size:12px;color:#999;">
+            {{ e.created_at|date:"M d, Y H:i" }}
+            {% if e.ip_address %} · {{ e.ip_address }}{% endif %}
+            {% if e.details.city %} · {{ e.details.city }}{% endif %}
+            {% if e.details.country %}, {{ e.details.country }}{% endif %}
+        </span>
+    </div>
+</div>
+{% empty %}
+<div class="mnx-empty">No security events recorded yet.</div>
+{% endfor %}
+{% endblock %}

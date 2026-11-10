@@ -1,0 +1,43 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Profile Picture — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_settings_tiles.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">PROFILE PICTURE</h1>
+<p class="mnx-sub">Upload a picture to personalise your MENNTRIX.</p>
+
+{% include "menntrix/_settings_tabs.html" %}
+
+<div class="mnx-settings-card">
+
+    {% if error_message %}<div class="error-message">{{ error_message }}</div>{% endif %}
+    {% if success_message %}<div class="success-message">{{ success_message }}</div>{% endif %}
+
+    <div class="mnx-settings-profile">
+        <div class="mnx-avatar">
+                        {% if user.profile_picture_menntrix %}
+                <img src="{{ MEDIA_URL }}profile_pictures/{{ user.profile_picture_menntrix }}"
+                     alt="Profile"
+                     onerror="this.style.display='none'">
+            {% endif %}
+        </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <label class="mnx-field-label">Choose an image</label>
+        <input type="file" name="filename" accept="image/*" class="formAccountStyle" required>
+
+        <div style="margin-top:16px;">
+            <input type="submit" value="UPLOAD" class="ButtonStyle">
+        </div>
+    </form>
+
+</div>
+{% endblock %}

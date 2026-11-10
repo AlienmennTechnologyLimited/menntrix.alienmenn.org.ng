@@ -1,0 +1,80 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}My Earnings — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">MY EARNINGS</h1>
+<p class="mnx-sub">Earn by using MENNTRIX. Every minute counts.</p>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+    <div class="mnx-settings-card" style="margin-bottom:0;">
+        <div style="color:#999;font-size:12px;letter-spacing:1px;">PAID</div>
+        <div style="color:#ccff00;font-size:26px;margin-top:6px;">
+            ₦{{ total_paid|floatformat:2 }}
+        </div>
+    </div>
+    <div class="mnx-settings-card" style="margin-bottom:0;">
+        <div style="color:#999;font-size:12px;letter-spacing:1px;">PENDING</div>
+        <div style="color:#ff9800;font-size:26px;margin-top:6px;">
+            ₦{{ total_pending|floatformat:2 }}
+        </div>
+    </div>
+</div>
+
+<h2 class="mnx-task-title">PAYOUTS</h2>
+
+{% for e in earnings %}
+<div class="mnx-row">
+    <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+                color:#ccff00;background:#1a1a1a;border:1px solid #333;border-radius:8px;
+                font-size:12px;letter-spacing:1px;flex-shrink:0;">
+        {{ e.pool.label }}
+    </div>
+    <div style="flex:1;min-width:0;">
+        <span class="mnx-row-name" style="display:block;color:#fff;">
+            ₦{{ e.amount|floatformat:2 }}
+            {% if e.paid %}
+                <span style="color:#4caf50;font-size:11px;"> · PAID</span>
+            {% else %}
+                <span style="color:#ff9800;font-size:11px;"> · PENDING</span>
+            {% endif %}
+        </span>
+        <span style="font-size:12px;color:#999;">
+            {{ e.minutes }} min · {{ e.share_percent }}% of pool
+            {% if e.pool.total_amount %} · pool ₦{{ e.pool.total_amount|floatformat:0 }}{% endif %}
+        </span>
+    </div>
+</div>
+{% empty %}
+<div class="mnx-empty">No payouts yet. Use MENNTRIX to earn minutes — you'll see earnings here after each monthly distribution.</div>
+{% endfor %}
+
+<h2 class="mnx-task-title" style="margin-top:32px;">MY MONTHLY MINUTES</h2>
+
+{% for u in usage %}
+<div class="mnx-row">
+    <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+                color:#ccff00;background:#1a1a1a;border:1px solid #333;border-radius:8px;
+                font-size:11px;letter-spacing:0.5px;flex-shrink:0;">
+        {{ u.year|stringformat:"04d" }}-{{ u.month|stringformat:"02d" }}
+    </div>
+    <div style="flex:1;min-width:0;">
+        <span class="mnx-row-name" style="display:block;color:#fff;">
+            {{ u.total_minutes }} total minutes
+        </span>
+        <span style="font-size:12px;color:#999;">
+            Calls: {{ u.call_minutes }} ·
+            Meetings: {{ u.meeting_minutes }} ·
+            Streams: {{ u.stream_minutes }}
+        </span>
+    </div>
+</div>
+{% empty %}
+<div class="mnx-empty">No usage yet. Start a call, join a meeting, or go live on a channel to earn minutes.</div>
+{% endfor %}
+{% endblock %}

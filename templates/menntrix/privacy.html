@@ -1,0 +1,82 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Privacy — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_settings_tiles.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">PRIVACY</h1>
+<p class="mnx-sub">Control what you share and who can reach you.</p>
+
+{% include "menntrix/_settings_tabs.html" %}
+
+{% if messages %}
+    {% for m in messages %}
+        <div class="{% if m.tags == 'error' %}error-message{% else %}success-message{% endif %}">{{ m }}</div>
+    {% endfor %}
+{% endif %}
+
+<form method="POST" class="mnx-privacy-form">
+    {% csrf_token %}
+
+    <div class="mnx-settings-card">
+        <h2 class="mnx-task-title">LOCATION SHARING</h2>
+        <p class="mnx-sub">Choose when MENNTRIX can show your live location to the other person. Always opt-in, always revocable.</p>
+
+        <label class="mnx-switch-row">
+            <span>Share location during 1-to-1 calls</span>
+            <input type="checkbox" name="share_location_calls" {% if privacy.share_location_calls %}checked{% endif %}>
+            <span class="mnx-switch"></span>
+        </label>
+
+        <label class="mnx-switch-row">
+            <span>Share location during group meetings</span>
+            <input type="checkbox" name="share_location_meetings" {% if privacy.share_location_meetings %}checked{% endif %}>
+            <span class="mnx-switch"></span>
+        </label>
+
+        <label class="mnx-switch-row">
+            <span>Share location on live channels</span>
+            <input type="checkbox" name="share_location_channels" {% if privacy.share_location_channels %}checked{% endif %}>
+            <span class="mnx-switch"></span>
+        </label>
+    </div>
+
+    <div class="mnx-settings-card">
+        <h2 class="mnx-task-title">HISTORY &amp; SAFETY</h2>
+
+        <label class="mnx-switch-row">
+            <span>Allow location history for security</span>
+            <input type="checkbox" name="allow_location_history" {% if privacy.allow_location_history %}checked{% endif %}>
+            <span class="mnx-switch"></span>
+        </label>
+    </div>
+
+    <div class="mnx-settings-card">
+        <h2 class="mnx-task-title">WHO CAN REACH ME</h2>
+        <p class="mnx-sub">By default, anyone on MENNTRIX can reach you. Turn these on to restrict to your connections only.</p>
+
+        <label class="mnx-switch-row">
+            <span>Only connections can call me</span>
+            <input type="checkbox" name="only_connections_can_call" {% if privacy.only_connections_can_call %}checked{% endif %}>
+            <span class="mnx-switch"></span>
+        </label>
+
+        <label class="mnx-switch-row">
+            <span>Only connections can message me</span>
+            <input type="checkbox" name="only_connections_can_message" {% if privacy.only_connections_can_message %}checked{% endif %}>
+            <span class="mnx-switch"></span>
+        </label>
+    </div>
+
+    <div class="mnx-privacy-actions">
+        <input type="submit" value="SAVE SETTINGS" class="ButtonStyle">
+        <a href="{% url 'privacy_location' %}" class="mnx-btn">LOCATION HISTORY</a>
+        <a href="{% url 'privacy_security' %}" class="mnx-btn">SECURITY LOG</a>
+        <a href="{% url 'privacy_blocked' %}" class="mnx-btn">BLOCKED USERS</a>
+    </div>
+</form>
+{% endblock %}

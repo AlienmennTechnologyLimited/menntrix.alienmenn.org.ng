@@ -1,0 +1,34 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Create Meeting — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<div class="menntrix-form-wrap" style="background:#232323;border:1px solid #333;margin:0;">
+    <h2 class="menntrix-form-title">CREATE A MEETING</h2>
+    <p class="menntrix-form-sub">You'll get a unique link to share with anyone.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <label class="mnx-field-label">Meeting title</label>
+        <input type="text" name="title" required class="formAccountStyle"
+               placeholder="e.g. Team sync, Daily standup..." value="{{ request.POST.title }}">
+
+        <label class="mnx-field-label">Description (optional)</label>
+        <textarea name="description" rows="4" class="formAccountStyle"
+                  placeholder="What is this meeting about?"></textarea>
+
+        <div style="margin-top:16px;">
+            <input type="submit" value="CREATE MEETING" class="ButtonStyle">
+        </div>
+    </form>
+
+    <p style="text-align:center;margin-top:20px;">
+        <a href="{% url 'meeting_list' %}" style="color:#ccff00;">Back to meetings</a>
+    </p>
+</div>
+{% endblock %}

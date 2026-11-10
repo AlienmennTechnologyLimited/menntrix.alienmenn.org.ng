@@ -1,0 +1,52 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Account — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_settings_tiles.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">ACCOUNT</h1>
+<p class="mnx-sub">Update your username and planet.</p>
+
+{% include "menntrix/_settings_tabs.html" %}
+
+<div class="mnx-settings-card">
+
+    {% if error_message %}<div class="error-message">{{ error_message }}</div>{% endif %}
+    {% if success_message %}<div class="success-message">{{ success_message }}</div>{% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label class="mnx-field-label">Username</label>
+        <input name="username" type="text" required class="formAccountStyle"
+               pattern="[A-Za-z0-9]+" title="Letters and numbers only"
+               value="{{ user.username }}">
+
+        <label class="mnx-field-label">Planet</label>
+        <select name="planet" class="formAccountStyle">
+            {% for planet in planets %}
+                <option value="{{ planet }}" {% if planet == user.planet %}selected{% endif %}>{{ planet }}</option>
+            {% empty %}
+                <option value="Earth" {% if user.planet == "Earth" %}selected{% endif %}>Earth</option>
+                <option value="Mars" {% if user.planet == "Mars" %}selected{% endif %}>Mars</option>
+                <option value="Venus" {% if user.planet == "Venus" %}selected{% endif %}>Venus</option>
+                <option value="Jupiter" {% if user.planet == "Jupiter" %}selected{% endif %}>Jupiter</option>
+                <option value="Saturn" {% if user.planet == "Saturn" %}selected{% endif %}>Saturn</option>
+            {% endfor %}
+        </select>
+
+        <label class="mnx-field-label">Current password (to confirm)</label>
+        <input name="currentpassword" type="password" required class="formAccountStylepassword"
+               placeholder="Your current password">
+
+        <div style="margin-top:16px;">
+            <input type="submit" value="UPDATE" class="ButtonStyle">
+        </div>
+    </form>
+
+</div>
+{% endblock %}

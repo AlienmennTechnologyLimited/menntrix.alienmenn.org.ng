@@ -1,0 +1,103 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}My Location History — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_settings_tiles.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">LOCATION HISTORY</h1>
+<p class="mnx-sub">Your last 50 location points captured by MENNTRIX.</p>
+
+{% include "menntrix/_settings_tabs.html" %}
+
+{% if messages %}
+    {% for m in messages %}
+        <div class="{% if m.tags == 'error' %}error-message{% else %}success-message{% endif %}">{{ m }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="mnx-map-block">
+    <div id="historyMap" class="mnx-map"></div>
+</div>
+
+{% if entries %}
+<div class="mnx-clear-row">
+    <h2 class="mnx-task-title" style="margin:0;">RECENT ENTRIES</h2>
+    <form method="POST" action="{% url 'privacy_clear_location' %}" onsubmit="return confirm('Clear all location history? This cannot be undone.')">
+        {% csrf_token %}
+        <button type="submit" class="mnx-btn mnx-btn-danger">CLEAR HISTORY</button>
+    </form>
+</div>
+
+{% for e in entries %}
+<div class="mnx-row">
+    <div class="mnx-row-avatar"></div>
+    <div style="flex:1;min-width:0;">
+        <span class="mnx-row-name" style="display:block;color:#fff;">
+            {{ e.source|upper }}
+            {% if e.ip_city %} · {{ e.ip_city }}{% endif %}
+            {% if e.ip_country %}, {{ e.ip_country }}{% endif %}
+        </span>
+        <span style="font-size:12px;color:#999;">
+            {{ e.created_at|date:"M d, Y H:i" }}
+            {% if e.latitude and e.longitude %}
+                · {{ e.latitude|floatformat:4 }}, {{ e.longitude|floatformat:4 }}
+            {% endif %}
+            {% if e.accuracy_m %} · ±{{ e.accuracy_m }}m{% endif %}
+        </span>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="mnx-empty">No location entries yet. Geolocation from your browser and IP-based lookup will appear here.</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .leaflet-container { background: #141414; font-family: Arial, Helvetica, sans-serif; }
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: #232323; color: #e0e0e0; border-radius: 8px; }
+    .leaflet-popup-content { margin: 10px 14px; font-size: 13px; }
+    .leaflet-bar a { background: #232323; color: #e0e0e0; border-color: #333; }
+    .leaflet-bar a:hover { background: #2e2e2e; color: #ccff00; }
+    .leaflet-control-attribution { background: rgba(20,20,20,0.75) !important; color: #666 !important; font-size: 10px !important; }
+    .leaflet-control-attribution a { color: #ccff00 !important; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const POINTS = [
+    {% for e in entries %}{% if e.latitude and e.longitude %}
+        { lat: {{ e.latitude }}, lng: {{ e.longitude }}, label: "{{ e.source|escapejs }} · {{ e.created_at|date:'M d H:i' }}{% if e.ip_city %} · {{ e.ip_city|escapejs }}{% endif %}" },
+    {% endif %}{% endfor %}
+];
+function initMap() {
+    const mapEl = document.getElementById('historyMap');
+    if (!mapEl) return;
+    if (POINTS.length === 0) {
+        mapEl.innerHTML = '<div style="padding:60px 20px;text-align:center;color:#888;font-size:14px;">No location points to display yet.</div>';
+        return;
+    }
+    const map = L.map(mapEl, { center: [POINTS[0].lat, POINTS[0].lng], zoom: 4, zoomControl: true });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19, subdomains: 'abcd',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>'
+    }).addTo(map);
+    const bounds = L.latLngBounds();
+    POINTS.forEach(p => {
+        const m = L.circleMarker([p.lat, p.lng], { radius: 7, color: '#ccff00', weight: 2, opacity: 1, fillColor: '#ccff00', fillOpacity: 0.35 }).addTo(map);
+        m.bindPopup(`<strong style="color:#ccff00;">${p.label}</strong><br><span style="color:#999;font-size:11px;">${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}</span>`);
+        bounds.extend([p.lat, p.lng]);
+    });
+    if (POINTS.length > 1) map.fitBounds(bounds, { padding: [40, 40] });
+    else map.setZoom(13);
+}
+document.addEventListener('DOMContentLoaded', initMap);
+</script>
+{% endblock %}

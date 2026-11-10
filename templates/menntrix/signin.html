@@ -1,0 +1,52 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>SIGNIN</title>
+
+
+<link href="{% static 'css/main2.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'css/app-Launcher.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'css/menntrix.css' %}" rel="stylesheet" type="text/css">
+<!-- style240 -->
+</head>
+
+<body>
+<div class="menntrix-form-wrap">
+
+    <h2 class="menntrix-form-title">SIGN IN TO MENNTRIX</h2>
+    <p class="menntrix-form-sub">Welcome back. Connect with people. Do business.</p>
+
+    {% if error_message %}
+        <div class="error-message">{{ error_message }}</div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <p>Email:<br>
+            <input type="email" name="email" required placeholder="you@example.com" class="formAccountStyle">
+        </p>
+
+        <p>Password:<br>
+            <input type="password" name="password" required placeholder="Your password" class="formAccountStyle">
+        </p>
+
+        <p>
+            <input type="submit" value="SIGN IN" class="ButtonStyle">
+        </p>
+    </form>
+
+ <a href="https://durionarch.alienmenn.org.ng/security-hub/password/forgot/"
+   target="_blank"
+   rel="noopener noreferrer">
+    Forgot your password? Reset it here
+</a>
+    <p style="text-align:center;margin-top:20px;">
+        Don't have an account? <a href="{% url 'signup' %}">Create one</a>
+    </p>
+
+</div>
+</body>
+</html>

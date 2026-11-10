@@ -1,0 +1,41 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Connections — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">CONNECTIONS</h1>
+<p class="mnx-sub">Your saved people. Add or remove anytime.</p>
+
+<div style="margin-bottom:16px;">
+    <a href="{% url 'people_search' %}" class="mnx-btn mnx-btn-primary">FIND NEW PEOPLE</a>
+</div>
+
+{% for u in peers %}
+<div class="mnx-row">
+    <div class="mnx-row-avatar">
+        
+    </div>
+    <div style="flex:1;min-width:0;">
+        <a href="{% url 'profile_view' u.id %}" class="mnx-row-name" style="display:block;color:#fff;">
+            {% if u.firstname or u.lastname %}{{ u.firstname }} {{ u.lastname }}{% else %}{{ u.username }}{% endif %}
+        </a>
+        <span style="font-size:12px;color:#999;">@{{ u.username }} · {{ u.country|default:"Earth" }}</span>
+    </div>
+    <div style="display:flex;gap:6px;">
+        <a href="{% url 'profile_view' u.id %}" class="mnx-btn" style="padding:6px 12px;font-size:11px;">VIEW</a>
+        <a href="{% url 'connection_remove' u.id %}?next=/connections/" class="mnx-btn" style="padding:6px 12px;font-size:11px;border-color:#ff6b6b;color:#ff6b6b;">REMOVE</a>
+    </div>
+</div>
+{% empty %}
+<div class="mnx-empty">You haven't added any connections yet.</div>
+{% endfor %}
+{% endblock %}
+
+{% block fab %}
+<a href="{% url 'people_search' %}" class="mnx-fab" title="Add people">+</a>
+{% endblock %}

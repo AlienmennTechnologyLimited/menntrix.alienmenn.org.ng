@@ -1,0 +1,46 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Payment Information — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_settings_tiles.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">PAYMENT INFORMATION</h1>
+<p class="mnx-sub">Your bank details for business.</p>
+
+{% include "menntrix/_settings_tabs.html" %}
+
+<div class="mnx-settings-card">
+
+    {% if error_message %}<div class="error-message">{{ error_message }}</div>{% endif %}
+    {% if success_message %}<div class="success-message">{{ success_message }}</div>{% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label class="mnx-field-label">Bank name</label>
+        <input name="bank_name" type="text" class="formAccountStyle" value="{{ user.bank_name }}">
+
+        <label class="mnx-field-label">Account name</label>
+        <input name="bank_acc_name" type="text" class="formAccountStyle" value="{{ user.bank_acc_name }}">
+
+        <label class="mnx-field-label">Account number</label>
+        <input name="bank_acc_no" type="tel" class="formAccountStyle" value="{{ user.bank_acc_no }}">
+
+        <label class="mnx-field-label">Account type</label>
+        <input name="bank_acc_type" type="text" class="formAccountStyle" value="{{ user.bank_acc_type }}">
+
+        <label class="mnx-field-label">Current password (to confirm)</label>
+        <input name="currentpassword" type="password" required class="formAccountStylepassword"
+               placeholder="Your current password">
+
+        <div style="margin-top:16px;">
+            <input type="submit" value="UPDATE" class="ButtonStyle">
+        </div>
+    </form>
+
+</div>
+{% endblock %}

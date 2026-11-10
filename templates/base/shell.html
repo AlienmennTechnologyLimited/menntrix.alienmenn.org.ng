@@ -1,0 +1,57 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}MENNTRIX{% endblock %}</title>
+    <meta name="description" content="MENNTRIX — THE MENNTRIX OPENSOURCE PROJECT">
+    <link href="{% static 'css/main2.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'css/app-Launcher.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'css/menntrix.css' %}" rel="stylesheet" type="text/css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+<div class="container">
+
+    <div class="navContent">
+        <a href="{% url 'home' %}">
+            <img src="{% static 'images/logo.gif' %}" alt="MENNTRIX" class="logoImg">
+        </a>
+
+        <div class="navMenuDiv">
+            <div class="NAVtEXT001"><a href="{% url 'home' %}">HOME</a></div>
+            <div class="NAVtEXT001"><a href="{% url 'menu' %}">MENU</a></div>
+            <div class="NAVtEXT001">
+                {% if request.session.MM_Username %}
+                    <a href="{% url 'dashboard' %}">DASHBOARD</a>
+                {% endif %}
+            </div>
+            <div class="NAVtEXT001">
+                {% if request.session.MM_Username %}
+                    <a href="{% url 'logout' %}" onclick="return confirm('Sign out of MENNTRIX?')" style="color:#ff6b6b;">SIGNOUT</a>
+                {% else %}
+                    <a href="{% url 'signin' %}">SIGNIN</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% block content %}{% endblock %}
+
+    <div class="footerDiv">
+        <p>&nbsp;</p>
+        <div class="navMainDiv2">
+            <img src="{% static 'images/LogoFooter.png' %}" alt="MENNTRIX" class="LogoDivFootAlign">
+        </div>
+        <div class="navMainDiv2">
+            <strong>MENNTRIX — THE MENNTRIX OPENSOURCE PROJECT</strong><br>
+            &copy; MENNTRIX. All rights reserved.
+        </div>
+        <p>&nbsp;</p>
+    </div>
+
+</div>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

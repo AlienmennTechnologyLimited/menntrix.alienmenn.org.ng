@@ -1,0 +1,51 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Share — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">SHARE</h1>
+<p class="mnx-sub">{{ title }}</p>
+
+<div class="mnx-settings-card">
+    <div class="mnx-info-list">
+        <div class="mnx-info-row">
+            <span>Link</span>
+            <strong style="font-size:12px;word-break:break-all;">{{ url }}</strong>
+        </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;">
+        <button class="mnx-btn mnx-btn-primary" onclick="copyShare()">📋 COPY LINK</button>
+
+        <a class="mnx-btn" target="_blank"
+           href="https://wa.me/?text={{ url|urlencode }}">WHATSAPP</a>
+
+        <a class="mnx-btn" target="_blank"
+           href="https://twitter.com/intent/tweet?url={{ url|urlencode }}&text={{ title|urlencode }}">X / TWITTER</a>
+
+        <a class="mnx-btn" target="_blank"
+           href="https://www.facebook.com/sharer/sharer.php?u={{ url|urlencode }}">FACEBOOK</a>
+
+        <a class="mnx-btn" href="mailto:?subject={{ title|urlencode }}&body={{ url|urlencode }}">EMAIL</a>
+    </div>
+
+    <p id="copyMsg" style="display:none;color:#ccff00;margin-top:12px;">✅ Copied to clipboard</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyShare() {
+    navigator.clipboard.writeText("{{ url }}").then(function () {
+        const msg = document.getElementById('copyMsg');
+        msg.style.display = 'block';
+        setTimeout(function () { msg.style.display = 'none'; }, 2000);
+    });
+}
+</script>
+{% endblock %}

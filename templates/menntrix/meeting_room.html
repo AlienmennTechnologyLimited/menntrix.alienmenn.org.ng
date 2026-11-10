@@ -1,0 +1,698 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}{{ meeting.title }} — MENNTRIX Meeting{% endblock %}
+
+{% block main_left %}{% endblock %}
+{% block main_right %}{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Meeting room uses the full width of the main area */
+    .mnx-main { grid-template-columns: 1fr !important; padding: 14px; }
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ============================================================
+// MENNTRIX MEETING ROOM
+// Layout: video stage (left) | header + chat + controls (right)
+// ============================================================
+const MEETING_UUID = "{{ meeting.uuid }}";
+const USER_ID = {{ user.id }};
+const USERNAME = "{{ user.username|escapejs }}";
+const ICE_SERVERS = {{ ice_servers_json|safe }};
+const MEDIA_URL = "{{ media_url|escapejs }}";
+const AVATARS = {{ avatars_json|safe }};
+
+let ws = null;
+let localStream = null;
+let peers = {};
+let sharingLocation = false;
+let map = null;
+let markers = {};
+
+// ---------- Build the UI ----------
+function buildMeetingUI() {
+    const mainEl = document.querySelector('.mnx-main');
+    if (!mainEl) return;
+
+    mainEl.innerHTML = `
+        <div class="mnx-meeting">
+
+            <div class="mnx-meeting-stage" id="videoGrid"></div>
+
+            <div class="mnx-meeting-head">
+                <div>
+                    <h2 class="mnx-meeting-title">{{ meeting.title|escapejs }}</h2>
+                    <span class="mnx-meeting-meta">Host: {{ meeting.host.username|escapejs }}{% if meeting.is_locked %} · 🔒 Locked{% endif %}</span>
+                </div>
+                <div class="mnx-meeting-link">
+                    <input type="text" readonly value="{{ meeting_link|escapejs }}" id="meetingLinkInput" class="mnx-meeting-link-input">
+                    <button class="mnx-btn mnx-btn-primary" onclick="copyMeetingLink()">COPY LINK</button>
+                </div>
+            </div>
+
+            <div class="mnx-meeting-side">
+                <div class="mnx-meeting-chat">
+                    <div class="mnx-call-chat-messages" id="chatMessages"></div>
+                    <input type="text" id="chatInput" placeholder="Type a message…" class="mnx-call-chat-input">
+                </div>
+
+                <div class="mnx-meeting-controls">
+                    <button class="mnx-call-btn" id="btnMic" title="Mute mic">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                    </button>
+
+                    <button class="mnx-call-btn" id="btnCam" title="Mute camera">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="23 7 16 12 23 17 23 7"/>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                        </svg>
+                    </button>
+
+                    <button class="mnx-call-btn" id="btnShareLoc" title="Share location">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                    </button>
+
+                    {% if is_host %}
+                    <a href="{% url 'meeting_toggle_lock' meeting.uuid %}" class="mnx-call-btn" title="Lock/Unlock">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="11" width="16" height="10" rx="2"/>
+                            <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+                        </svg>
+                    </a>
+                    <a href="{% url 'meeting_end' meeting.uuid %}" class="mnx-call-btn mnx-call-btn-end" title="End meeting" onclick="return confirm('End the meeting for everyone?')">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                        </svg>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'meeting_leave' meeting.uuid %}" class="mnx-call-btn mnx-call-btn-end" title="Leave">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                    </a>
+                    {% endif %}
+                </div>
+
+                <div id="callMapWrap" class="mnx-call-map-wrap" style="display:none;">
+                    <div id="callMap" class="mnx-call-map"></div>
+                    <p class="mnx-call-map-note">📍 Live location sharing is ON</p>
+                </div>
+            </div>
+
+        </div>
+    `;
+}
+
+// ---------- Init ----------
+async function init() {
+    buildMeetingUI();
+
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    } catch (e) {
+        alert("Camera/mic access denied");
+        return;
+    }
+
+    addLocalTile();
+
+    const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+    ws = new WebSocket(`${wsScheme}://${window.location.host}/ws/meeting/${MEETING_UUID}/`);
+    ws.onmessage = handleMessage;
+    ws.onclose = () => console.warn("WS closed");
+
+    document.getElementById('btnMic').onclick = toggleMic;
+    document.getElementById('btnCam').onclick = toggleCam;
+    document.getElementById('btnShareLoc').onclick = toggleLocationShare;
+
+    document.getElementById('chatInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            const text = e.target.value.trim();
+            if (text && ws && ws.readyState === 1) {
+                ws.send(JSON.stringify({ type: 'chat', text }));
+                e.target.value = '';
+            }
+        }
+    });
+
+    // Clean disconnect on page hide
+    window.addEventListener('pagehide', () => {
+        if (ws && ws.readyState === 1) ws.close();
+    });
+}
+
+function addLocalTile() {
+    const grid = document.getElementById('videoGrid');
+    const tile = document.createElement('div');
+    tile.className = 'mnx-meeting-tile mnx-meeting-tile-local';
+
+    const vid = document.createElement('video');
+    vid.autoplay = true;
+    vid.playsInline = true;
+    vid.muted = true;
+    vid.srcObject = localStream;
+
+    const label = document.createElement('span');
+    label.className = 'mnx-meeting-tile-label';
+    label.textContent = "You";
+
+    tile.appendChild(vid);
+    tile.appendChild(label);
+    tile.dataset.userId = USER_ID;
+    grid.appendChild(tile);
+}{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}{{ meeting.title }} — MENNTRIX Meeting{% endblock %}
+
+{% block main_left %}{% endblock %}
+{% block main_right %}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .mnx-main { grid-template-columns: 1fr !important; padding: 14px; }
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ============================================================
+// MENNTRIX MEETING ROOM
+// Layout: video stage (left) | header + chat + controls (right)
+// ============================================================
+const MEETING_UUID = "{{ meeting.uuid }}";
+const USER_ID = {{ user.id }};
+const USERNAME = "{{ user.username|escapejs }}";
+const ICE_SERVERS = {{ ice_servers_json|safe }};
+const MEDIA_URL = "{{ media_url|escapejs }}";
+const AVATARS = {{ avatars_json|safe }};
+const SHARE_URL = "{{ share_url|escapejs }}";
+
+let ws = null;
+let localStream = null;
+let peers = {};
+let sharingLocation = false;
+let map = null;
+let markers = {};
+
+// ---------- Build the UI ----------
+function buildMeetingUI() {
+    const mainEl = document.querySelector('.mnx-main');
+    if (!mainEl) return;
+
+    mainEl.innerHTML = `
+        <div class="mnx-meeting">
+
+            <div class="mnx-meeting-stage" id="videoGrid"></div>
+
+            <div class="mnx-meeting-head">
+                <div>
+                    <h2 class="mnx-meeting-title">{{ meeting.title|escapejs }}</h2>
+                    <span class="mnx-meeting-meta">Host: {{ meeting.host.username|escapejs }}{% if meeting.is_locked %} · 🔒 Locked{% endif %}</span>
+                </div>
+                <div class="mnx-meeting-link">
+                    <input type="text" readonly value="{{ meeting_link|escapejs }}" id="meetingLinkInput" class="mnx-meeting-link-input">
+                    <button class="mnx-btn mnx-btn-primary" onclick="copyMeetingLink()">COPY LINK</button>
+                    <a href="${SHARE_URL}" class="mnx-btn" target="_blank">↗ SHARE</a>
+                </div>
+            </div>
+
+            <div class="mnx-meeting-side">
+                <div class="mnx-meeting-chat">
+                    <div class="mnx-call-chat-messages" id="chatMessages"></div>
+                    <input type="text" id="chatInput" placeholder="Type a message…" class="mnx-call-chat-input">
+                </div>
+
+                <div class="mnx-meeting-controls">
+                    <button class="mnx-call-btn" id="btnMic" title="Mute mic">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                    </button>
+
+                    <button class="mnx-call-btn" id="btnCam" title="Mute camera">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="23 7 16 12 23 17 23 7"/>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                        </svg>
+                    </button>
+
+                    <button class="mnx-call-btn" id="btnShareLoc" title="Share location">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                    </button>
+
+                    {% if is_host %}
+                    <a href="{% url 'meeting_toggle_lock' meeting.uuid %}" class="mnx-call-btn" title="Lock/Unlock">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="11" width="16" height="10" rx="2"/>
+                            <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+                        </svg>
+                    </a>
+                    <a href="{% url 'meeting_end' meeting.uuid %}" class="mnx-call-btn mnx-call-btn-end" title="End meeting" onclick="return confirm('End the meeting for everyone?')">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                        </svg>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'meeting_leave' meeting.uuid %}" class="mnx-call-btn mnx-call-btn-end" title="Leave">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                    </a>
+                    {% endif %}
+                </div>
+
+                <div id="callMapWrap" class="mnx-call-map-wrap" style="display:none;">
+                    <div id="callMap" class="mnx-call-map"></div>
+                    <p class="mnx-call-map-note">📍 Live location sharing is ON</p>
+                </div>
+            </div>
+
+        </div>
+    `;
+}
+
+// ---------- Init ----------
+async function init() {
+    buildMeetingUI();
+
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    } catch (e) {
+        alert("Camera/mic access denied");
+        return;
+    }
+
+    addLocalTile();
+
+    const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+    ws = new WebSocket(`${wsScheme}://${window.location.host}/ws/meeting/${MEETING_UUID}/`);
+    ws.onmessage = handleMessage;
+    ws.onclose = () => console.warn("WS closed");
+
+    document.getElementById('btnMic').onclick = toggleMic;
+    document.getElementById('btnCam').onclick = toggleCam;
+    document.getElementById('btnShareLoc').onclick = toggleLocationShare;
+
+    document.getElementById('chatInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            const text = e.target.value.trim();
+            if (text && ws && ws.readyState === 1) {
+                ws.send(JSON.stringify({ type: 'chat', text }));
+                e.target.value = '';
+            }
+        }
+    });
+
+    // Clean disconnect on page hide
+    window.addEventListener('pagehide', () => {
+        if (ws && ws.readyState === 1) ws.close();
+    });
+}
+
+function addLocalTile() {
+    const grid = document.getElementById('videoGrid');
+    const tile = document.createElement('div');
+    tile.className = 'mnx-meeting-tile mnx-meeting-tile-local';
+
+    const vid = document.createElement('video');
+    vid.autoplay = true;
+    vid.playsInline = true;
+    vid.muted = true;
+    vid.srcObject = localStream;
+
+    const label = document.createElement('span');
+    label.className = 'mnx-meeting-tile-label';
+    label.textContent = "You";
+
+    tile.appendChild(vid);
+    tile.appendChild(label);
+    tile.dataset.userId = USER_ID;
+    grid.appendChild(tile);
+}
+
+function addPeerTile(userId, username) {
+    if (peers[userId]) return peers[userId];
+    const grid = document.getElementById('videoGrid');
+    const tile = document.createElement('div');
+    tile.className = 'mnx-meeting-tile';
+
+    // Avatar overlay (shown until video arrives)
+    const avatarUrl = AVATARS[userId]
+        ? `${MEDIA_URL}profile_pictures/${AVATARS[userId]}`
+        : '';
+    if (avatarUrl) {
+        const avatar = document.createElement('img');
+        avatar.className = 'mnx-meeting-tile-avatar';
+        avatar.src = avatarUrl;
+        avatar.alt = username;
+        tile.appendChild(avatar);
+    }
+
+    const vid = document.createElement('video');
+    vid.autoplay = true;
+    vid.playsInline = true;
+
+    const label = document.createElement('span');
+    label.className = 'mnx-meeting-tile-label';
+    label.textContent = username;
+
+    tile.appendChild(vid);
+    tile.appendChild(label);
+    tile.dataset.userId = userId;
+    grid.appendChild(tile);
+    return { tile, vid };
+}
+
+async function createPeer(userId, isInitiator) {
+    if (peers[userId]) return peers[userId].pc;
+    const { tile, vid } = addPeerTile(userId, "User " + userId);
+    const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+
+    pc.onicecandidate = e => {
+        if (e.candidate) ws.send(JSON.stringify({ type: 'ice', target_id: userId, payload: e.candidate }));
+    };
+    pc.ontrack = e => {
+        vid.srcObject = e.streams[0];
+        // Hide avatar once video arrives
+        const avatar = tile.querySelector('.mnx-meeting-tile-avatar');
+        if (avatar) avatar.style.display = 'none';
+    };
+    localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+    peers[userId] = { pc, vid, tile };
+
+    if (isInitiator) {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        ws.send(JSON.stringify({ type: 'offer', target_id: userId, payload: offer }));
+    }
+    return pc;
+}
+
+async function handleMessage(event) {
+    const data = JSON.parse(event.data);
+    switch (data.type) {
+        case "participants_list":
+            for (const pid of data.participants) {
+                if (pid === USER_ID) continue;
+                await createPeer(pid, USER_ID < pid);
+            }
+            break;
+        case "peer_join":
+            await createPeer(data.user_id, USER_ID < data.user_id);
+            break;
+        case "peer_leave":
+            if (peers[data.user_id]) {
+                peers[data.user_id].pc.close();
+                peers[data.user_id].tile.remove();
+                delete peers[data.user_id];
+            }
+            break;
+        case "signal": await handleSignal(data); break;
+        case "chat": appendChat(data.username, data.text); break;
+        case "location": showPeerLocation(data.sender_id, data.username, data.lat, data.lng); break;
+        case "meeting_ended":
+            alert("Host ended the meeting.");
+            window.location.href = "{% url 'meeting_list' %}";
+            break;
+    }
+}
+
+async function handleSignal(data) {
+    const senderId = data.sender_id;
+    const pc = await createPeer(senderId, false);
+    if (data.signal_type === "offer") {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.payload));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        ws.send(JSON.stringify({ type: 'answer', target_id: senderId, payload: answer }));
+    } else if (data.signal_type === "answer") {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.payload));
+    } else if (data.signal_type === "ice") {
+        try { await pc.addIceCandidate(new RTCIceCandidate(data.payload)); } catch (e) {}
+    }
+}
+
+function toggleMic() {
+    const a = localStream.getAudioTracks();
+    a.forEach(t => t.enabled = !t.enabled);
+    document.getElementById('btnMic').classList.toggle('mnx-call-btn-off', !a[0]?.enabled);
+}
+function toggleCam() {
+    const v = localStream.getVideoTracks();
+    v.forEach(t => t.enabled = !t.enabled);
+    document.getElementById('btnCam').classList.toggle('mnx-call-btn-off', !v[0]?.enabled);
+}
+function toggleLocationShare() {
+    sharingLocation = !sharingLocation;
+    document.getElementById('btnShareLoc').classList.toggle('mnx-call-btn-off', !sharingLocation);
+    if (sharingLocation) {
+        document.getElementById('callMapWrap').style.display = "block";
+        initMap();
+        navigator.geolocation.watchPosition(pos => {
+            const { latitude, longitude, accuracy } = pos.coords;
+            if (ws && ws.readyState === 1) {
+                ws.send(JSON.stringify({ type: 'location', lat: latitude, lng: longitude, accuracy: Math.round(accuracy || 0) }));
+            }
+        }, err => console.warn(err), { enableHighAccuracy: true });
+    } else {
+        document.getElementById('callMapWrap').style.display = "none";
+    }
+}
+function initMap() {
+    if (map) return;
+    const el = document.getElementById('callMap');
+    if (!el) return;
+    map = L.map(el, { center: [0, 0], zoom: 2 });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19, subdomains: 'abcd',
+        attribution: '&copy; OpenStreetMap &copy; CARTO'
+    }).addTo(map);
+}
+function showPeerLocation(userId, username, lat, lng) {
+    if (!map) initMap();
+    const pos = [parseFloat(lat), parseFloat(lng)];
+    if (!markers[userId]) {
+        markers[userId] = L.circleMarker(pos, { radius: 7, color: '#ccff00', weight: 2, fillColor: '#ccff00', fillOpacity: 0.35 }).addTo(map).bindPopup(username);
+        map.setView(pos, 13);
+    } else {
+        markers[userId].setLatLng(pos);
+    }
+}
+function appendChat(username, text) {
+    const box = document.getElementById('chatMessages');
+    if (!box) return;
+    const el = document.createElement('div');
+    el.className = 'mnx-call-chat-msg';
+    const strong = document.createElement('strong');
+    strong.textContent = username + ':';
+    el.appendChild(strong);
+    el.appendChild(document.createTextNode(' ' + text));
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+}
+function copyMeetingLink() {
+    const input = document.getElementById('meetingLinkInput');
+    input.select();
+    document.execCommand('copy');
+    alert("Meeting link copied!");
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+{% endblock %}
+
+function addPeerTile(userId, username) {
+    if (peers[userId]) return peers[userId];
+    const grid = document.getElementById('videoGrid');
+    const tile = document.createElement('div');
+    tile.className = 'mnx-meeting-tile';
+
+    const vid = document.createElement('video');
+    vid.autoplay = true;
+    vid.playsInline = true;
+
+    // Avatar overlay (shown until video arrives)
+    const avatarUrl = AVATARS[userId]
+        ? `${MEDIA_URL}profile_pictures/${AVATARS[userId]}`
+        : '';
+    if (avatarUrl) {
+        const avatar = document.createElement('img');
+        avatar.className = 'mnx-meeting-tile-avatar';
+        avatar.src = avatarUrl;
+        avatar.alt = username;
+        tile.appendChild(avatar);
+    }
+
+    const label = document.createElement('span');
+    label.className = 'mnx-meeting-tile-label';
+    label.textContent = username;
+
+    tile.appendChild(vid);
+    tile.appendChild(label);
+    tile.dataset.userId = userId;
+    grid.appendChild(tile);
+    return { tile, vid };
+}
+
+async function createPeer(userId, isInitiator) {
+    if (peers[userId]) return peers[userId].pc;
+    const { tile, vid } = addPeerTile(userId, "User " + userId);
+    const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+
+    pc.onicecandidate = e => {
+        if (e.candidate) ws.send(JSON.stringify({ type: 'ice', target_id: userId, payload: e.candidate }));
+    };
+    pc.ontrack = e => { vid.srcObject = e.streams[0]; };
+    localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+    peers[userId] = { pc, vid, tile };
+
+    if (isInitiator) {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        ws.send(JSON.stringify({ type: 'offer', target_id: userId, payload: offer }));
+    }
+    return pc;
+}
+
+async function handleMessage(event) {
+    const data = JSON.parse(event.data);
+    switch (data.type) {
+        case "participants_list":
+            for (const pid of data.participants) {
+                if (pid === USER_ID) continue;
+                await createPeer(pid, USER_ID < pid);
+            }
+            break;
+        case "peer_join":
+            await createPeer(data.user_id, USER_ID < data.user_id);
+            break;
+        case "peer_leave":
+            if (peers[data.user_id]) {
+                peers[data.user_id].pc.close();
+                peers[data.user_id].tile.remove();
+                delete peers[data.user_id];
+            }
+            break;
+        case "signal": await handleSignal(data); break;
+        case "chat": appendChat(data.username, data.text); break;
+        case "location": showPeerLocation(data.sender_id, data.username, data.lat, data.lng); break;
+        case "meeting_ended":
+            alert("Host ended the meeting.");
+            window.location.href = "{% url 'meeting_list' %}";
+            break;
+    }
+}
+
+async function handleSignal(data) {
+    const senderId = data.sender_id;
+    const pc = await createPeer(senderId, false);
+    if (data.signal_type === "offer") {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.payload));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        ws.send(JSON.stringify({ type: 'answer', target_id: senderId, payload: answer }));
+    } else if (data.signal_type === "answer") {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.payload));
+    } else if (data.signal_type === "ice") {
+        try { await pc.addIceCandidate(new RTCIceCandidate(data.payload)); } catch (e) {}
+    }
+}
+
+function toggleMic() {
+    const a = localStream.getAudioTracks();
+    a.forEach(t => t.enabled = !t.enabled);
+    document.getElementById('btnMic').classList.toggle('mnx-call-btn-off', !a[0]?.enabled);
+}
+function toggleCam() {
+    const v = localStream.getVideoTracks();
+    v.forEach(t => t.enabled = !t.enabled);
+    document.getElementById('btnCam').classList.toggle('mnx-call-btn-off', !v[0]?.enabled);
+}
+function toggleLocationShare() {
+    sharingLocation = !sharingLocation;
+    document.getElementById('btnShareLoc').classList.toggle('mnx-call-btn-off', !sharingLocation);
+    if (sharingLocation) {
+        document.getElementById('callMapWrap').style.display = "block";
+        initMap();
+        navigator.geolocation.watchPosition(pos => {
+            const { latitude, longitude, accuracy } = pos.coords;
+            if (ws && ws.readyState === 1) {
+                ws.send(JSON.stringify({ type: 'location', lat: latitude, lng: longitude, accuracy: Math.round(accuracy || 0) }));
+            }
+        }, err => console.warn(err), { enableHighAccuracy: true });
+    } else {
+        document.getElementById('callMapWrap').style.display = "none";
+    }
+}
+function initMap() {
+    if (map) return;
+    const el = document.getElementById('callMap');
+    if (!el) return;
+    map = L.map(el, { center: [0, 0], zoom: 2 });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19, subdomains: 'abcd',
+        attribution: '&copy; OpenStreetMap &copy; CARTO'
+    }).addTo(map);
+}
+function showPeerLocation(userId, username, lat, lng) {
+    if (!map) initMap();
+    const pos = [parseFloat(lat), parseFloat(lng)];
+    if (!markers[userId]) {
+        markers[userId] = L.circleMarker(pos, { radius: 7, color: '#ccff00', weight: 2, fillColor: '#ccff00', fillOpacity: 0.35 }).addTo(map).bindPopup(username);
+        map.setView(pos, 13);
+    } else {
+        markers[userId].setLatLng(pos);
+    }
+}
+function appendChat(username, text) {
+    const box = document.getElementById('chatMessages');
+    if (!box) return;
+    const el = document.createElement('div');
+    el.className = 'mnx-call-chat-msg';
+    el.innerHTML = `<strong></strong>`;
+    el.querySelector('strong').textContent = username + ':';
+    el.appendChild(document.createTextNode(' ' + text));
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+}
+function copyMeetingLink() {
+    const input = document.getElementById('meetingLinkInput');
+    input.select();
+    document.execCommand('copy');
+    alert("Meeting link copied!");
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+{% endblock %}

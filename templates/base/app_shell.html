@@ -1,0 +1,114 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1a1a">
+    <title>{% block title %}MENNTRIX{% endblock %}</title>
+    <link href="{% static 'css/main2.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'css/app-Launcher.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'css/menntrix.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'css/menntrix-app.css' %}" rel="stylesheet" type="text/css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="mnx-app-body">
+
+<div class="mnx-shell">
+
+        <header class="mnx-topbar">
+        <a href="{% url 'dashboard' %}" class="mnx-logo">MENNTRIX</a>
+        <div class="mnx-topbar-right">
+            <a href="{% url 'notifications_page' %}" class="mnx-bell" id="mnxBell" title="Notifications">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <span class="mnx-bell-badge" id="mnxBellBadge" style="display:none;">0</span>
+            </a>
+            <a href="{% url 'logout' %}" class="mnx-logout" onclick="return confirm('Sign out of MENNTRIX?')">LOGOUT</a>
+        </div>
+    </header>
+
+    <nav class="mnx-rail" aria-label="Primary">
+
+        <a href="{% url 'setting' %}" class="mnx-rail-item" title="Profile">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="mnx-rail-label">Profile</span>
+        </a>
+
+        <a href="{% url 'message_inbox' %}" class="mnx-rail-item" title="Message">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <span class="mnx-rail-label">Message</span>
+        </a>
+
+        <a href="{% url 'call_history' %}" class="mnx-rail-item" title="Call">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span class="mnx-rail-label">Call</span>
+        </a>
+
+        <a href="{% url 'channel_browse' %}" class="mnx-rail-item" title="Channel">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            <span class="mnx-rail-label">Channel</span>
+        </a>
+
+        <a href="{% url 'meeting_list' %}" class="mnx-rail-item" title="Meeting">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span class="mnx-rail-label">Meeting</span>
+        </a>
+
+        <a href="{% url 'people_search' %}" class="mnx-rail-item" title="People">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="mnx-rail-label">People</span>
+        </a>
+
+        <a href="{% url 'people_search' %}" class="mnx-rail-item" title="Add People">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+            <span class="mnx-rail-label">Add</span>
+        </a>
+
+        <a href="{% url 'setting' %}" class="mnx-rail-item" title="Settings">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span class="mnx-rail-label">Settings</span>
+        </a>
+
+    </nav>
+
+    <main class="mnx-main">
+        <div class="mnx-col-left" id="mnxColLeft">
+            {% block main_left %}{% endblock %}
+        </div>
+        <div class="mnx-col-right" id="mnxColRight">
+            {% block main_right %}{% endblock %}
+        </div>
+    </main>
+
+    {% block fab %}{% endblock %}
+
+    <button class="mnx-toggle-btn" id="mnxToggle" type="button">TASKS</button>
+
+</div>
+
+<script>
+// Mobile toggle: greet panel default, tasks panel toggled.
+document.addEventListener('DOMContentLoaded', function () {
+    const body = document.body;
+    const toggle = document.getElementById('mnxToggle');
+    if (!toggle) return;
+    body.classList.remove('mnx-show-tasks');
+    toggle.textContent = 'TASKS';
+    toggle.addEventListener('click', function () {
+        const isTasks = body.classList.toggle('mnx-show-tasks');
+        toggle.textContent = isTasks ? 'CLOSE' : 'TASKS';
+    });
+});
+</script>
+
+<!-- MENNTRIX global listeners: incoming calls + call initiator -->
+<script src="{% static 'js/menntrix-listener.js' %}"></script>
+<script src="{% static 'js/menntrix-callinit.js' %}"></script>
+<script src="{% static 'js/menntrix-notify.js' %}"></script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,6 @@
+<div class="mnx-settings-tabs">
+    <a href="{% url 'account' %}" class="mnx-tab-link {% if request.resolver_match.url_name == 'account' %}mnx-active{% endif %}">ACCOUNT</a>
+    <a href="{% url 'personalinfo' %}" class="mnx-tab-link {% if request.resolver_match.url_name == 'personalinfo' %}mnx-active{% endif %}">PERSONAL</a>
+    <a href="{% url 'payment' %}" class="mnx-tab-link {% if request.resolver_match.url_name == 'payment' %}mnx-active{% endif %}">PAYMENT</a>
+    <a href="{% url 'security' %}" class="mnx-tab-link {% if request.resolver_match.url_name == 'security' %}mnx-active{% endif %}">SECURITY</a>
+</div>

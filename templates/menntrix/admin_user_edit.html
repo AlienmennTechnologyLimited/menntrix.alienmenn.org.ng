@@ -1,0 +1,125 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Edit {{ target.username }} — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_settings_tiles.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">EDIT USER</h1>
+<p class="mnx-sub">
+    @{{ target.username|default:"—" }} · {{ target.email }}
+    {% if is_admin %}<span style="color:#ccff00;"> · ADMIN</span>{% endif %}
+</p>
+
+{% if messages %}
+    {% for m in messages %}
+        <div class="{% if m.tags == 'error' %}error-message{% else %}success-message{% endif %}">{{ m }}</div>
+    {% endfor %}
+{% endif %}
+
+<div style="margin-bottom:16px;">
+    <a href="{% url 'admin_users' %}" class="mnx-btn">← BACK TO USERS</a>
+</div>
+
+{# ---------- ADMIN STATUS ---------- #}
+<div class="mnx-settings-card">
+    <h2 class="mnx-task-title">ADMIN ROLE</h2>
+    {% if is_admin %}
+        <p class="mnx-sub">This user has admin access.</p>
+        {% if target.id == user.id %}
+            <p style="color:#999;font-size:13px;">You cannot remove your own admin access.</p>
+        {% else %}
+            <form method="POST" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="remove_admin">
+                <button type="submit" class="mnx-btn"
+                        style="border-color:#ff6b6b;color:#ff6b6b;"
+                        onclick="return confirm('Remove admin access from {{ target.username }}?')">
+                    REMOVE ADMIN
+                </button>
+            </form>
+        {% endif %}
+    {% else %}
+        <p class="mnx-sub">This is a regular user.</p>
+        <form method="POST" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="make_admin">
+            <button type="submit" class="mnx-btn mnx-btn-primary"
+                    onclick="return confirm('Grant admin access to {{ target.username }}?')">
+                MAKE ADMIN
+            </button>
+        </form>
+    {% endif %}
+</div>
+
+{# ---------- ACTIVE STATUS ---------- #}
+<div class="mnx-settings-card">
+    <h2 class="mnx-task-title">ACCOUNT STATUS</h2>
+    <p class="mnx-sub">Current status: <strong>{{ target.status|default:"active" }}</strong></p>
+    {% if target.id != user.id %}
+        <form method="POST" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="toggle_active">
+            {% if target.status|lower == "inactive" %}
+                <button type="submit" class="mnx-btn mnx-btn-primary">REACTIVATE</button>
+            {% else %}
+                <button type="submit" class="mnx-btn"
+                        style="border-color:#ff6b6b;color:#ff6b6b;"
+                        onclick="return confirm('Deactivate this account?')">
+                    DEACTIVATE
+                </button>
+            {% endif %}
+        </form>
+    {% endif %}
+</div>
+
+{# ---------- PROFILE ---------- #}
+<div class="mnx-settings-card">
+    <h2 class="mnx-task-title">PROFILE</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_profile">
+
+        <label class="mnx-field-label">First name</label>
+        <input name="firstname" type="text" class="formAccountStyle" value="{{ target.firstname|default:'' }}">
+
+        <label class="mnx-field-label">Last name</label>
+        <input name="lastname" type="text" class="formAccountStyle" value="{{ target.lastname|default:'' }}">
+
+        <label class="mnx-field-label">Email</label>
+        <input name="email" type="email" class="formAccountStyle" value="{{ target.email|default:'' }}">
+
+        <label class="mnx-field-label">Mobile</label>
+        <input name="mobile" type="text" class="formAccountStyle" value="{{ target.mobile|default:'' }}">
+
+        <label class="mnx-field-label">Country</label>
+        <input name="country" type="text" class="formAccountStyle" value="{{ target.country|default:'' }}">
+
+        <div style="margin-top:16px;">
+            <input type="submit" value="SAVE PROFILE" class="ButtonStyle">
+        </div>
+    </form>
+</div>
+
+{# ---------- PASSWORD RESET ---------- #}
+<div class="mnx-settings-card">
+    <h2 class="mnx-task-title">RESET PASSWORD</h2>
+    <p class="mnx-sub">Set a new password for this user. They can change it later.</p>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="reset_password">
+
+        <label class="mnx-field-label">New password</label>
+        <input name="new_password" type="text" class="formAccountStyle"
+               placeholder="Minimum 8 characters">
+
+        <div style="margin-top:16px;">
+            <input type="submit" value="RESET PASSWORD" class="ButtonStyle"
+                   onclick="return confirm('Reset password for {{ target.username }}?')">
+        </div>
+    </form>
+</div>
+{% endblock %}

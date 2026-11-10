@@ -1,0 +1,91 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Call History — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">CALL HISTORY</h1>
+<p class="mnx-sub">Recent calls you made and received.</p>
+
+{% if messages %}
+    {% for m in messages %}
+        <div class="{% if m.tags == 'error' %}error-message{% else %}success-message{% endif %}">{{ m }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="mnx-clear-row" style="margin-top:0;">
+    <a href="{% url 'call_clear_mine' %}" class="mnx-btn" onclick="return confirm('Clear any stuck ringing/active calls for your account?')">CLEAR STUCK CALLS</a>
+</div>
+
+<div class="mnx-tabs">
+    <a href="#" class="mnx-tab-link mnx-active" data-tab="made" onclick="switchTab('made', this); return false;">MADE</a>
+    <a href="#" class="mnx-tab-link" data-tab="received" onclick="switchTab('received', this); return false;">RECEIVED</a>
+</div>
+
+<div id="tab-made" class="mnx-tab-panel">
+    {% for c in made %}
+    <div class="mnx-row">
+        <div class="mnx-row-avatar"></div>
+        <div style="flex:1;min-width:0;">
+            <span class="mnx-row-name" style="display:block;color:#fff;">To: {{ c.callee.username }}</span>
+            <span style="font-size:12px;color:#999;">
+                {{ c.call_type|upper }} · {{ c.status }}{% if c.ended_reason %} ({{ c.ended_reason }}){% endif %} · {{ c.started_at|date:"M d, H:i" }} · {{ c.duration_sec }}s
+            </span>
+        </div>
+        <div style="display:flex;gap:6px;">
+            <a href="#" class="mnx-btn mnx-call-start" style="padding:6px 12px;font-size:11px;" data-user-id="{{ c.callee.id }}" data-type="voice" title="Voice call">📞</a>
+            <a href="#" class="mnx-btn mnx-btn-primary mnx-call-start" style="padding:6px 12px;font-size:11px;" data-user-id="{{ c.callee.id }}" data-type="video" title="Video call">📹</a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="mnx-empty">No calls made yet.</div>
+    {% endfor %}
+</div>
+
+<div id="tab-received" class="mnx-tab-panel" style="display:none;">
+    {% for c in received %}
+    <div class="mnx-row">
+        <div class="mnx-row-avatar"></div>
+        <div style="flex:1;min-width:0;">
+            <span class="mnx-row-name" style="display:block;color:#fff;">From: {{ c.caller.username }}</span>
+            <span style="font-size:12px;color:#999;">
+                {{ c.call_type|upper }} · {{ c.status }}{% if c.ended_reason %} ({{ c.ended_reason }}){% endif %} · {{ c.started_at|date:"M d, H:i" }} · {{ c.duration_sec }}s
+            </span>
+        </div>
+        <div style="display:flex;gap:6px;">
+            <a href="#" class="mnx-btn mnx-call-start" style="padding:6px 12px;font-size:11px;" data-user-id="{{ c.caller.id }}" data-type="voice" title="Voice call">📞</a>
+            <a href="#" class="mnx-btn mnx-btn-primary mnx-call-start" style="padding:6px 12px;font-size:11px;" data-user-id="{{ c.caller.id }}" data-type="video" title="Video call">📹</a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="mnx-empty">No calls received yet.</div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block fab %}
+<a href="{% url 'people_search' %}" class="mnx-fab" title="New call">📞</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchTab(tab, el) {
+    document.getElementById('tab-made').style.display = (tab === 'made') ? 'block' : 'none';
+    document.getElementById('tab-received').style.display = (tab === 'received') ? 'block' : 'none';
+    document.querySelectorAll('.mnx-tabs .mnx-tab-link').forEach(a => a.classList.remove('mnx-active'));
+    el.classList.add('mnx-active');
+    if (history.replaceState) history.replaceState(null, '', '#' + tab);
+}
+document.addEventListener('DOMContentLoaded', function () {
+    const hash = (window.location.hash || '').replace('#', '');
+    if (hash === 'received') {
+        const btn = document.querySelector('.mnx-tabs .mnx-tab-link[data-tab="received"]');
+        if (btn) switchTab('received', btn);
+    }
+});
+</script>
+{% endblock %}

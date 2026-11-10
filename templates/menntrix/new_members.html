@@ -1,0 +1,19 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}New Members — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">NEW MEMBERS</h1>
+<p class="mnx-sub">People who just joined MENNTRIX.</p>
+
+{% include "menntrix/_people_rows.html" with users=users connected_ids=connected_ids %}
+{% endblock %}
+
+{% block fab %}
+<a href="{% url 'people_search' %}" class="mnx-fab" title="Add people">+</a>
+{% endblock %}

@@ -1,0 +1,207 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>SIGNUP</title>
+
+<link href="{% static 'css/main2.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'css/app-Launcher.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'css/menntrix.css' %}" rel="stylesheet" type="text/css">
+<!-- style240 -->
+</head>
+
+<body>
+<div class="menntrix-form-wrap">
+
+    <h2 class="menntrix-form-title">CREATE ALIENMENN ACCOUNT</h2>
+    <p class="menntrix-form-sub">Connect with people. Do business. Free and open source.</p>
+
+    {% if error_message %}
+        <div class="error-message">{{ error_message }}</div>
+    {% endif %}
+
+    <form method="POST" id="signupForm" onsubmit="return validateForm()">
+        {% csrf_token %}
+
+        <p>Username:<br>
+            <input type="text"
+                   name="username"
+                   required
+                   class="formAccountStyle"
+                   id="username"
+                   placeholder="Letters and numbers only"
+                   pattern="[A-Za-z0-9]+"
+                   title="Letters and numbers only. No spaces."
+                   value="{{ request.POST.username|default:'' }}"
+                   oninput="validateUsername(this)">
+            <div id="usernameError" class="error-message" style="display:none;"></div>
+        </p>
+
+        <p>First name:<br>
+            <input type="text" name="firstname" required placeholder="First name"
+                   class="formAccountStyle"
+                   value="{{ request.POST.firstname|default:'' }}">
+        </p>
+
+        <p>Last name:<br>
+            <input type="text" name="lastname" required placeholder="Last name"
+                   class="formAccountStyle"
+                   value="{{ request.POST.lastname|default:'' }}">
+        </p>
+
+        <p>Email:<br>
+            <input type="email" name="email" required placeholder="you@example.com"
+                   class="formAccountStyle"
+                   value="{{ request.POST.email|default:'' }}">
+        </p>
+
+        <p>Password:<br>
+            <input type="password" name="password" required placeholder="Choose a password"
+                   class="formAccountStyle" id="password">
+        </p>
+
+        <p>Confirm Password:<br>
+            <input type="password" name="confirmpassword" required placeholder="Repeat your password"
+                   class="formAccountStyle" id="confirmpassword"
+                   oninput="validatePasswordMatch()">
+            <div id="passwordError" class="error-message" style="display:none;"></div>
+        </p>
+
+        <p>Gender:<br>
+            <select name="gender" class="formAccountStyle">
+                <option value="Male"   {% if request.POST.gender == "Male" %}selected{% endif %}>Male</option>
+                <option value="Female" {% if request.POST.gender == "Female" %}selected{% endif %}>Female</option>
+                <option value="Other"  {% if request.POST.gender == "Other" %}selected{% endif %}>Other</option>
+            </select>
+        </p>
+
+        <p>Date of birth:<br>
+            <input type="text" name="dob" placeholder="dd/mm/yyyy"
+                   class="formAccountStyle"
+                   value="{{ request.POST.dob|default:'' }}">
+        </p>
+
+        <p>Country:<br>
+            <select name="country" id="countrySelect" required class="formAccountStyle">
+                <option value="">— choose your country —</option>
+                {% for c in countries %}
+                    <option value="{{ c.country_name }}"
+                            data-code="{{ c.country_code|default:'' }}"
+                            {% if request.POST.country == c.country_name %}selected{% endif %}>
+                        {{ c.country_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <p>Mobile:<br>
+            <input type="text" name="country_code" id="countryCodeInput"
+                   placeholder="Code"
+                   class="formAccountStyle"
+                   style="width:25%;display:inline-block;"
+                   value="{{ request.POST.country_code|default:'' }}"
+                   readonly>
+            <input type="text" name="mobile" placeholder="Mobile number"
+                   class="formAccountStyle"
+                   style="width:72%;display:inline-block;"
+                   value="{{ request.POST.mobile|default:'' }}">
+        </p>
+
+        <p>
+            <input type="submit" value="CREATE ACCOUNT" class="ButtonStyle">
+        </p>
+
+        <input type="hidden" name="currency" value="NGN">
+        <input type="hidden" name="ref_id" value="1">
+    </form>
+
+    <p style="text-align:center;margin-top:20px;">
+        Already have an account? <a href="{% url 'signin' %}">Sign in</a>
+    </p>
+
+</div>
+
+<script>
+// ============================================================
+// COUNTRY → PHONE CODE
+// Fills the read-only country_code input when a country is selected.
+// ============================================================
+document.addEventListener('DOMContentLoaded', function () {
+    const countrySelect = document.getElementById('countrySelect');
+    const codeInput = document.getElementById('countryCodeInput');
+    if (!countrySelect || !codeInput) return;
+
+    function syncCode() {
+        const opt = countrySelect.options[countrySelect.selectedIndex];
+        codeInput.value = opt ? (opt.dataset.code || '') : '';
+    }
+
+    countrySelect.addEventListener('change', syncCode);
+    syncCode();  // fills on page load if a country was preselected (error re-render)
+});
+
+// ============================================================
+// USERNAME VALIDATION (existing)
+// ============================================================
+function validateUsername(input) {
+    const username = input.value;
+    const regex = /^[A-Za-z0-9]+$/;
+    const errorDiv = document.getElementById('usernameError');
+    if (username.length > 0 && !regex.test(username)) {
+        errorDiv.textContent = '❌ Username can only contain letters and numbers.';
+        errorDiv.style.display = 'block';
+        input.classList.add('invalid-input');
+        return false;
+    } else {
+        errorDiv.style.display = 'none';
+        input.classList.remove('invalid-input');
+        return true;
+    }
+}
+
+// ============================================================
+// PASSWORD MATCH (existing)
+// ============================================================
+function validatePasswordMatch() {
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirmpassword').value;
+    const errorDiv = document.getElementById('passwordError');
+    if (confirm.length > 0 && password !== confirm) {
+        errorDiv.textContent = '❌ Passwords do not match';
+        errorDiv.style.display = 'block';
+        return false;
+    } else {
+        errorDiv.style.display = 'none';
+        return true;
+    }
+}
+
+// ============================================================
+// FORM SUBMIT GATE (existing + phone code sanity check)
+// ============================================================
+function validateForm() {
+    const usernameInput = document.getElementById('username');
+    if (!validateUsername(usernameInput)) {
+        alert('Username can only contain letters and numbers.');
+        return false;
+    }
+
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirmpassword').value;
+    if (password !== confirm) {
+        alert('Passwords do not match.');
+        return false;
+    }
+
+    const countrySelect = document.getElementById('countrySelect');
+    if (!countrySelect.value) {
+        alert('Please choose your country.');
+        return false;
+    }
+
+    return true;
+}
+</script>
+</body>
+</html>

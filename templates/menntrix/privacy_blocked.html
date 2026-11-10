@@ -1,0 +1,50 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Blocked Users — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_settings_tiles.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">BLOCKED USERS</h1>
+<p class="mnx-sub">People you've blocked. Unblock any of them anytime.</p>
+
+{% include "menntrix/_settings_tabs.html" %}
+
+{% if messages %}
+    {% for m in messages %}
+        <div class="{% if m.tags == 'error' %}error-message{% else %}success-message{% endif %}">{{ m }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="privacy-blocked-list">
+{% for b in blocked %}
+<div class="mnx-row">
+    <div class="mnx-row-avatar">
+        {% if b.blocked.profile_picture_menntrix %}
+            <img src="{{ MEDIA_URL }}profile_pictures/{{ b.blocked.profile_picture_menntrix }}" alt="{{ b.blocked.username }}">
+        {% endif %}
+    </div>
+    <div style="flex:1;min-width:0;">
+        <span class="mnx-row-name" style="display:block;color:#fff;">
+            {% if b.blocked.firstname or b.blocked.lastname %}
+                {{ b.blocked.firstname }} {{ b.blocked.lastname }}
+            {% else %}
+                {{ b.blocked.username }}
+            {% endif %}
+        </span>
+        <span style="font-size:12px;color:#999;">
+            @{{ b.blocked.username }} · blocked {{ b.created_at|date:"M d, Y" }}
+        </span>
+    </div>
+    <div>
+        <a href="{% url 'privacy_unblock' b.blocked.id %}" class="mnx-btn mnx-btn-primary" style="padding:6px 12px;font-size:11px;">UNBLOCK</a>
+    </div>
+</div>
+{% empty %}
+<div class="mnx-empty">You haven't blocked anyone.</div>
+{% endfor %}
+</div>
+{% endblock %}

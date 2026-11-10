@@ -1,0 +1,46 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Settings — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_settings_tiles.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">SETTINGS</h1>
+<p class="mnx-sub">Your MENNTRIX account at a glance.</p>
+
+{% include "menntrix/_settings_tabs.html" %}
+
+<div class="mnx-settings-card">
+
+            <div class="mnx-avatar">
+            {% if profile_picture %}
+                <img src="{{ MEDIA_URL }}profile_pictures/{{ profile_picture }}"
+                     alt="Profile"
+                     onerror="this.style.display='none'">
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mnx-info-list">
+        <div class="mnx-info-row"><span>Name</span><strong>{{ user.firstname }} {{ user.middlename }} {{ user.lastname }}</strong></div>
+        <div class="mnx-info-row"><span>Username</span><strong>@{{ user.username }}</strong></div>
+        <div class="mnx-info-row"><span>Email</span><strong>{{ user.email }}</strong></div>
+        <div class="mnx-info-row"><span>Phone</span><strong>{{ user.mobile|default:"—" }}</strong></div>
+        <div class="mnx-info-row"><span>Gender</span><strong>{{ user.gender|default:"—" }}</strong></div>
+        <div class="mnx-info-row"><span>Country</span><strong>{{ user.country|default:"—" }}</strong></div>
+        <div class="mnx-info-row"><span>Planet</span><strong>{{ user.planet|default:"Earth" }}</strong></div>
+    </div>
+
+    <div class="mnx-settings-actions">
+        <a href="{% url 'profile_picture' %}" class="mnx-btn mnx-btn-primary">CHANGE PICTURE</a>
+        <a href="{% url 'notifications_page' %}" class="mnx-btn">NOTIFICATIONS</a>
+        <a href="{% url 'activity_log_page' %}" class="mnx-btn">MY ACTIVITY</a>
+        <a href="{% url 'privacy_blocked' %}" class="mnx-btn">BLOCKED USERS</a>
+        <a href="{% url 'my_earnings' %}" class="mnx-btn">EARNINGS</a>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Meetings — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">MEETINGS</h1>
+<p class="mnx-sub">Create a meeting. Share a link. Talk to your group.</p>
+
+<div style="margin-bottom:16px;">
+    <a href="{% url 'meeting_create' %}" class="mnx-btn mnx-btn-primary">+ CREATE NEW MEETING</a>
+</div>
+
+<div class="mnx-tabs">
+    <a href="#" class="mnx-tab-link mnx-active" data-tab="hosted" onclick="switchTab('hosted', this); return false;">HOSTED</a>
+    <a href="#" class="mnx-tab-link" data-tab="joined" onclick="switchTab('joined', this); return false;">JOINED</a>
+</div>
+
+<div id="tab-hosted" class="mnx-tab-panel">
+    {% for m in hosted %}
+    <div class="mnx-row">
+        <div class="mnx-row-avatar"></div>
+        <div style="flex:1;min-width:0;">
+            <a href="{% url 'meeting_room' m.uuid %}" class="mnx-row-name" style="display:block;color:#fff;">{{ m.title }}</a>
+            <span style="font-size:12px;color:#999;">
+                {{ m.created_at|date:"M d, Y H:i" }} ·
+                {% if m.is_active %}<span style="color:#ccff00;">ACTIVE</span>{% else %}ENDED{% endif %}
+                {% if m.is_locked %} · 🔒 LOCKED{% endif %}
+            </span>
+        </div>
+        <div>
+            {% if m.is_active %}
+            <a href="{% url 'meeting_room' m.uuid %}" class="mnx-btn mnx-btn-primary" style="padding:6px 12px;font-size:11px;">OPEN</a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="mnx-empty">No meetings hosted yet.</div>
+    {% endfor %}
+</div>
+
+<div id="tab-joined" class="mnx-tab-panel" style="display:none;">
+    {% for m in joined %}
+    <div class="mnx-row">
+        <div class="mnx-row-avatar"></div>
+        <div style="flex:1;min-width:0;">
+            <span class="mnx-row-name" style="display:block;color:#fff;">{{ m.title }}</span>
+            <span style="font-size:12px;color:#999;">
+                Host: {{ m.host.username }} · {{ m.created_at|date:"M d, Y H:i" }}
+                {% if not m.is_active %} · ENDED{% endif %}
+            </span>
+        </div>
+        <div>
+            {% if m.is_active %}
+            <a href="{% url 'meeting_room' m.uuid %}" class="mnx-btn mnx-btn-primary" style="padding:6px 12px;font-size:11px;">OPEN</a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="mnx-empty">No meetings joined yet.</div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block fab %}
+<a href="{% url 'meeting_create' %}" class="mnx-fab" title="New meeting">+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchTab(tab, el) {
+    document.getElementById('tab-hosted').style.display = (tab === 'hosted') ? 'block' : 'none';
+    document.getElementById('tab-joined').style.display = (tab === 'joined') ? 'block' : 'none';
+
+    document.querySelectorAll('.mnx-tabs .mnx-tab-link').forEach(a => a.classList.remove('mnx-active'));
+    el.classList.add('mnx-active');
+
+    if (history.replaceState) {
+        history.replaceState(null, '', '#' + tab);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const hash = (window.location.hash || '').replace('#', '');
+    if (hash === 'joined') {
+        const btn = document.querySelector('.mnx-tabs .mnx-tab-link[data-tab="joined"]');
+        if (btn) switchTab('joined', btn);
+    }
+});
+</script>
+{% endblock %}

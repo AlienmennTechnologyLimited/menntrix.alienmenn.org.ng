@@ -1,0 +1,70 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}{{ folder|capfirst }} — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">{{ folder|upper }}</h1>
+<p class="mnx-sub">Your messages. Compose, read, star, or trash anytime.</p>
+
+<div class="mnx-tabs">
+    <a href="{% url 'message_inbox' %}" class="mnx-tab-link {% if folder == 'inbox' %}mnx-active{% endif %}">
+        INBOX {% if unread_count %}({{ unread_count }}){% endif %}
+    </a>
+    <a href="{% url 'message_starred' %}" class="mnx-tab-link {% if folder == 'starred' %}mnx-active{% endif %}">STARRED</a>
+    <a href="{% url 'message_sent' %}" class="mnx-tab-link {% if folder == 'sent' %}mnx-active{% endif %}">SENT</a>
+    <a href="{% url 'message_drafts' %}" class="mnx-tab-link {% if folder == 'drafts' %}mnx-active{% endif %}">DRAFTS</a>
+    <a href="{% url 'message_trash_folder' %}" class="mnx-tab-link {% if folder == 'trash' %}mnx-active{% endif %}">TRASH</a>
+    <a href="{% url 'group_list' %}" class="mnx-tab-link">GROUPS</a>
+</div>
+
+<div style="margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;">
+    <a href="{% url 'message_compose' %}" class="mnx-btn mnx-btn-primary">✏ COMPOSE</a>
+    <a href="{% url 'group_create' %}" class="mnx-btn">+ NEW GROUP</a>
+    {% if folder == "trash" %}
+        <form method="POST" action="{% url 'trash_empty' %}" style="display:inline;"
+              onsubmit="return confirm('Permanently delete EVERYTHING in the trash?')">
+            {% csrf_token %}
+            <button type="submit" class="mnx-btn"
+                    style="border-color:#ff6b6b;color:#ff6b6b;">🗑 EMPTY TRASH</button>
+        </form>
+    {% endif %}
+</div>
+
+<div id="messageRows">
+    {% include "menntrix/_message_rows.html" with messages=messages folder=folder user=user %}
+</div>
+
+<div id="loadMoreWrap" style="text-align:center;margin:20px 0;">
+    {% if messages.has_next %}
+    <button class="mnx-btn" onclick="loadMore()">LOAD MORE</button>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block fab %}
+<a href="{% url 'message_compose' %}" class="mnx-fab" title="Compose">✏</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentPage = 1;
+let hasNext = {% if messages.has_next %}true{% else %}false{% endif %};
+
+function loadMore() {
+    if (!hasNext) return;
+    currentPage += 1;
+    fetch(`?page=${currentPage}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('messageRows').insertAdjacentHTML('beforeend', data.html);
+            hasNext = data.has_next;
+            if (!hasNext) document.getElementById('loadMoreWrap').style.display = 'none';
+        });
+}
+</script>
+{% endblock %}

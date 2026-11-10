@@ -1,0 +1,56 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}User Management — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_settings_tiles.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">USER MANAGEMENT</h1>
+<p class="mnx-sub">{{ users|length }} user{{ users|length|pluralize }} · You are managing MENNTRIX accounts.</p>
+
+<div class="mnx-search">
+    <form method="GET" style="display:flex;gap:8px;width:100%;">
+        <input type="text" name="q" value="{{ q }}" placeholder="SEARCH BY USERNAME, EMAIL, NAME ...">
+        <button type="submit" aria-label="Search">🔍</button>
+    </form>
+</div>
+
+<div style="margin-bottom:16px;">
+    <a href="{% url 'setting' %}" class="mnx-btn">← BACK TO SETTINGS</a>
+</div>
+
+{% for u in users %}
+<div class="mnx-row">
+    <div class="mnx-row-avatar">
+        {% if u.profile_picture_menntrix %}
+            <img src="{{ MEDIA_URL }}profile_pictures/{{ u.profile_picture_menntrix }}" alt="">
+        {% endif %}
+    </div>
+    <div style="flex:1;min-width:0;">
+        <span class="mnx-row-name" style="display:block;color:#fff;">
+            {% if u.firstname or u.lastname %}
+                {{ u.firstname }} {{ u.lastname }}
+            {% else %}
+                {{ u.username|default:"(no username)" }}
+            {% endif %}
+            {% if u.username in admin_names %}
+                <span style="color:#ccff00;font-size:11px;"> · ADMIN</span>
+            {% endif %}
+        </span>
+        <span style="font-size:12px;color:#999;">
+            @{{ u.username|default:"—" }} · {{ u.email }}
+            {% if u.status %} · {{ u.status }}{% endif %}
+        </span>
+    </div>
+    <div style="display:flex;gap:6px;">
+        <a href="{% url 'admin_user_edit' u.id %}" class="mnx-btn mnx-btn-primary"
+           style="padding:6px 12px;font-size:11px;">MANAGE</a>
+    </div>
+</div>
+{% empty %}
+<div class="mnx-empty">No users found.</div>
+{% endfor %}
+{% endblock %}

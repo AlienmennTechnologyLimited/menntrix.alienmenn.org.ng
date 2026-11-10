@@ -1,0 +1,371 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}{{ channel.title }} — MENNTRIX Channel{% endblock %}
+
+{% block main_left %}{% endblock %}
+{% block main_right %}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .mnx-main { grid-template-columns: 1fr !important; padding: 14px; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script id="mnx-channel-data" type="application/json">
+{
+    "slug": "{{ channel.slug|escapejs }}",
+    "title": "{{ channel.title|escapejs }}",
+    "owner": "{{ channel.owner.username|escapejs }}",
+    "ownerId": {{ channel.owner_id }},
+    "isHost": {% if is_host %}true{% else %}false{% endif %},
+    "isSubscribed": {% if is_subscribed %}true{% else %}false{% endif %},
+    "isLive": {% if channel.is_live %}true{% else %}false{% endif %},
+    "userId": {{ user.id }},
+    "username": "{{ user.username|escapejs }}",
+    "iceServers": {{ ice_servers_json|safe }},
+    "goLiveUrl": "{% url 'channel_go_live' channel.slug %}",
+    "endStreamUrl": "{% url 'channel_end_stream' channel.slug %}",
+    "subscribeUrl": "{% url 'channel_subscribe' channel.slug %}",
+    "unsubscribeUrl": "{% url 'channel_unsubscribe' channel.slug %}",
+    "shareUrl": "{{ share_url|escapejs }}",
+    "recentComments": {{ recent_comments_json|safe }},
+    "mediaUrl": "{{ media_url|escapejs }}",
+    "avatars": {{ avatars_json|safe }},
+    "subscriberCount": {{ channel.subscriber_count }},
+    "viewCount": {{ channel.view_count }},
+    "commentCount": {{ channel.comment_count }}
+}
+</script>
+
+<script>
+// ============================================================
+// MENNTRIX CHANNEL WATCH
+// ============================================================
+const DATA = JSON.parse(document.getElementById('mnx-channel-data').textContent);
+const SLUG = DATA.slug;
+const USER_ID = DATA.userId;
+const USERNAME = DATA.username;
+const IS_HOST = DATA.isHost;
+const IS_SUBSCRIBED = DATA.isSubscribed;
+const IS_LIVE = DATA.isLive;
+const ICE_SERVERS = DATA.iceServers;
+const GO_LIVE_URL = DATA.goLiveUrl;
+const END_STREAM_URL = DATA.endStreamUrl;
+const SUBSCRIBE_URL = DATA.subscribeUrl;
+const UNSUBSCRIBE_URL = DATA.unsubscribeUrl;
+const SHARE_URL = DATA.shareUrl;
+const CHANNEL_TITLE = DATA.title;
+const CHANNEL_SLUG = DATA.slug;
+const CHANNEL_OWNER = DATA.owner;
+const CHANNEL_OWNER_ID = DATA.ownerId;
+const INITIAL_COMMENTS = DATA.recentComments || [];
+const MEDIA_URL_CH = DATA.mediaUrl || '/media/';
+const AVATARS = DATA.avatars || {};
+
+let ws = null;
+let localStream = null;
+const peers = {};   // { viewerId: { pc } } for host, or { host: { pc } } for viewer
+
+function liveBadgeHTML() {
+    if (IS_LIVE) {
+        return '<span class="mnx-live-badge"><span class="mnx-live-dot"></span>LIVE</span>';
+    }
+    return '<span class="mnx-offline-badge">OFFLINE</span>';
+}
+
+function hostActionHTML() {
+    if (!IS_HOST) return '';
+    if (IS_LIVE) {
+        return `<a href="${END_STREAM_URL}" class="mnx-float-action mnx-float-end" onclick="return confirm('End the stream?')"><span class="mnx-float-icon">■</span> END STREAM</a>`;
+    }
+    return `<a href="${GO_LIVE_URL}" class="mnx-float-action mnx-float-go"><span class="mnx-float-icon">▶</span> GO LIVE</a>`;
+}
+
+function overlayHTML() {
+    if (IS_LIVE) {
+        return IS_HOST ? 'You are about to go live…' : 'Connecting to stream…';
+    }
+    return 'This channel is offline.';
+}
+
+function overlayAvatarHTML() {
+    // Show the HOST avatar when offline (or connecting)
+    const hostAvatar = AVATARS[CHANNEL_OWNER_ID]
+        ? `${MEDIA_URL_CH}profile_pictures/${AVATARS[CHANNEL_OWNER_ID]}`
+        : '';
+    if (!hostAvatar || IS_LIVE) return '';
+    return `<img class="mnx-channel-avatar" src="${hostAvatar}" alt="host avatar">`;
+}
+
+function subscribeButtonHTML() {
+    // Only non-hosts see the subscribe button
+    if (IS_HOST) return '';
+    if (IS_SUBSCRIBED) {
+        return `<a href="${UNSUBSCRIBE_URL}" class="mnx-btn" style="margin-top:10px;">UNSUBSCRIBE</a>`;
+    }
+    return `<a href="${SUBSCRIBE_URL}" class="mnx-btn mnx-btn-primary" style="margin-top:10px;">SUBSCRIBE</a>`;
+}
+
+function statsHTML() {
+    return `
+        <div class="mnx-channel-meta-row">
+            <span class="mnx-channel-meta">
+                <strong>${DATA.subscriberCount}</strong> subscribers ·
+                <strong>${DATA.viewCount}</strong> views ·
+                <strong>${DATA.commentCount}</strong> comments
+            </span>
+        </div>
+    `;
+}
+
+function buildChannelUI() {
+    const mainEl = document.querySelector('.mnx-main');
+    if (!mainEl) return;
+    mainEl.classList.add('mnx-channel-mode');
+
+    mainEl.innerHTML = `
+        <div class="mnx-channel-grid">
+            <div class="mnx-channel-stage-col">
+                <div class="mnx-channel-stage">
+                    <video id="remoteVideo" autoplay playsinline class="mnx-channel-video"></video>
+                    <video id="localVideo" autoplay playsinline muted class="mnx-channel-local"></video>
+                    <div class="mnx-channel-overlay" id="channelOverlay">
+                        ${overlayAvatarHTML()}
+                        <div>${overlayHTML()}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mnx-channel-side-col">
+                <div class="mnx-channel-ad">ADVERTISEMENT</div>
+
+                <div class="mnx-channel-details">
+                    <h1 class="mnx-channel-title">
+                        ${CHANNEL_TITLE}
+                        ${liveBadgeHTML()}
+                    </h1>
+                    <div class="mnx-channel-meta-row"><span class="mnx-channel-meta">@${CHANNEL_SLUG}</span></div>
+                    <div class="mnx-channel-meta-row"><span class="mnx-channel-meta">Host: ${CHANNEL_OWNER}</span></div>
+                    <div class="mnx-channel-meta-row"><span class="mnx-channel-meta"><span id="viewerCount">0</span> watching now</span></div>
+                    ${statsHTML()}
+
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+                        ${subscribeButtonHTML()}
+                        <a href="${SHARE_URL}" class="mnx-btn" target="_blank"
+                           style="margin-top:10px;">↗ SHARE</a>
+                    </div>
+                </div>
+
+                <div class="mnx-channel-comments">
+                    <h3 class="mnx-channel-comments-title">LIVE COMMENTS</h3>
+                    <div class="mnx-channel-comments-list" id="commentsList"></div>
+                    <div class="mnx-channel-comment-input">
+                        <input type="text" id="commentInput" placeholder="Say something…" maxlength="2000">
+                        <button id="commentSend" type="button">SEND</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        ${hostActionHTML()}
+    `;
+
+    const commentsList = document.getElementById('commentsList');
+    INITIAL_COMMENTS.forEach(c => {
+        const el = document.createElement('div');
+        el.className = 'mnx-comment';
+        el.innerHTML = `<strong>${c.username}</strong> <span class="mnx-comment-time">${c.time}</span><p></p>`;
+        el.querySelector('p').textContent = c.text;
+        commentsList.appendChild(el);
+    });
+}
+
+async function init() {
+    buildChannelUI();
+
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const channelOverlay = document.getElementById('channelOverlay');
+    const commentsList = document.getElementById('commentsList');
+    const commentInput = document.getElementById('commentInput');
+    const commentSend = document.getElementById('commentSend');
+    const viewerCountEl = document.getElementById('viewerCount');
+
+    // Host: get local camera
+    if (IS_HOST) {
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            localVideo.srcObject = localStream;
+            localVideo.style.display = 'block';
+            if (IS_LIVE) channelOverlay.style.display = 'none';
+        } catch (e) {
+            channelOverlay.textContent = "Camera/mic access denied";
+            return;
+        }
+    }
+
+    // WebSocket
+    const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+    ws = new WebSocket(`${wsScheme}://${window.location.host}/ws/channel/${SLUG}/`);
+    ws.onmessage = handleMessage;
+    ws.onclose = () => console.warn("Channel WS closed");
+
+    // Comments
+    commentSend.addEventListener('click', sendComment);
+    commentInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendComment(); });
+
+    function sendComment() {
+        const text = commentInput.value.trim();
+        if (!text || !ws || ws.readyState !== 1) return;
+        ws.send(JSON.stringify({ type: 'comment', text }));
+        commentInput.value = '';
+    }
+
+    async function handleMessage(event) {
+        const data = JSON.parse(event.data);
+        switch (data.type) {
+            case "comments_snapshot":
+                commentsList.innerHTML = '';
+                data.comments.forEach(c => appendComment(c.username, c.text, c.created_at));
+                break;
+            case "comment":
+                appendComment(data.username, data.text, data.created_at);
+                break;
+            case "viewer_join":
+                if (viewerCountEl) viewerCountEl.textContent = data.viewer_count;
+                // HOST: create a NEW pc for this viewer
+                if (IS_HOST && data.user_id !== USER_ID && IS_LIVE) {
+                    await createHostPeer(data.user_id);
+                }
+                break;
+            case "viewer_leave":
+                if (viewerCountEl) viewerCountEl.textContent = data.viewer_count;
+                if (IS_HOST && peers[data.user_id]) {
+                    try { peers[data.user_id].pc.close(); } catch (e) {}
+                    delete peers[data.user_id];
+                }
+                break;
+            case "stream_state":
+                if (data.state === 'live') {
+                    channelOverlay.style.display = 'none';
+                    if (!IS_HOST) initViewerConnection();
+                } else if (data.state === 'ended') {
+                    channelOverlay.style.display = 'flex';
+                    channelOverlay.textContent = "Stream ended.";
+                    remoteVideo.srcObject = null;
+                }
+                break;
+            case "signal":
+                await handleSignal(data);
+                break;
+        }
+    }
+
+    // ---------- VIEWER: connect to host ----------
+    async function initViewerConnection() {
+        if (peers['host']) return;
+        const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+        pc.onicecandidate = e => {
+            if (e.candidate) {
+                ws.send(JSON.stringify({
+                    type: 'signal',
+                    target_id: null,
+                    signal_type: 'ice',
+                    payload: e.candidate,
+                }));
+            }
+        };
+        pc.ontrack = e => {
+            remoteVideo.srcObject = e.streams[0];
+            channelOverlay.style.display = 'none';
+        };
+        pc.addTransceiver('video', { direction: 'recvonly' });
+        pc.addTransceiver('audio', { direction: 'recvonly' });
+        peers['host'] = { pc };
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        ws.send(JSON.stringify({
+            type: 'signal',
+            target_id: null,
+            signal_type: 'offer',
+            payload: offer,
+        }));
+    }
+
+    // ---------- HOST: create ONE pc per viewer ----------
+    async function createHostPeer(viewerId) {
+        if (peers[viewerId]) return peers[viewerId].pc;
+        const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+        pc.onicecandidate = e => {
+            if (e.candidate) {
+                ws.send(JSON.stringify({
+                    type: 'signal',
+                    target_id: viewerId,
+                    signal_type: 'ice',
+                    payload: e.candidate,
+                }));
+            }
+        };
+        if (localStream) {
+            localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+        }
+        peers[viewerId] = { pc };
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        ws.send(JSON.stringify({
+            type: 'signal',
+            target_id: viewerId,
+            signal_type: 'offer',
+            payload: offer,
+        }));
+        return pc;
+    }
+
+    // ---------- SIGNAL HANDLER ----------
+    async function handleSignal(data) {
+        if (IS_HOST) {
+            const viewerId = data.sender_id;
+            const pc = await createHostPeer(viewerId);
+            if (data.signal_type === 'offer') {
+                await pc.setRemoteDescription(new RTCSessionDescription(data.payload));
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+                ws.send(JSON.stringify({
+                    type: 'signal',
+                    target_id: viewerId,
+                    signal_type: 'answer',
+                    payload: answer,
+                }));
+            } else if (data.signal_type === 'ice') {
+                try { await pc.addIceCandidate(new RTCIceCandidate(data.payload)); } catch (e) {}
+            }
+        } else {
+            const pc = peers['host']?.pc;
+            if (!pc) return;
+            if (data.signal_type === 'answer') {
+                await pc.setRemoteDescription(new RTCSessionDescription(data.payload));
+            } else if (data.signal_type === 'ice') {
+                try { await pc.addIceCandidate(new RTCIceCandidate(data.payload)); } catch (e) {}
+            }
+        }
+    }
+
+    function appendComment(username, text, createdAt) {
+        const el = document.createElement('div');
+        el.className = 'mnx-comment';
+        const t = new Date(createdAt);
+        const hh = String(t.getHours()).padStart(2, '0');
+        const mm = String(t.getMinutes()).padStart(2, '0');
+        el.innerHTML = `<strong></strong> <span class="mnx-comment-time">${hh}:${mm}</span><p></p>`;
+        el.querySelector('strong').textContent = username;
+        el.querySelector('p').textContent = text;
+        commentsList.appendChild(el);
+        commentsList.scrollTop = commentsList.scrollHeight;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+{% endblock %}

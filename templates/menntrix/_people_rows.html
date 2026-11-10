@@ -1,0 +1,28 @@
+{% load static %}
+{% for u in users %}
+<div class="mnx-row">
+    <div class="mnx-row-avatar">
+        {% if u.profile_picture_menntrix %}
+    <img src="{{ MEDIA_URL }}profile_pictures/{{ u.profile_picture_menntrix }}" ...>
+{% endif %}
+    </div>
+
+    <div style="flex:1;min-width:0;">
+        <a href="{% url 'profile_view' u.id %}" class="mnx-row-name" style="display:block;color:#fff;">
+            {% if u.firstname or u.lastname %}{{ u.firstname }} {{ u.lastname }}{% else %}{{ u.username }}{% endif %}
+        </a>
+        <span style="font-size:12px;color:#999;">@{{ u.username }} · {{ u.country|default:"Earth" }}</span>
+    </div>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        {% if u.id in connected_ids %}
+            <a href="{% url 'connection_remove' u.id %}?next=/people/" class="mnx-btn" style="padding:6px 12px;font-size:11px;border-color:#ff6b6b;color:#ff6b6b;">REMOVE</a>
+        {% else %}
+            <a href="{% url 'connection_add' u.id %}?next=/people/" class="mnx-btn mnx-btn-primary" style="padding:6px 12px;font-size:11px;">CONNECT</a>
+        {% endif %}
+        <a href="{% url 'profile_view' u.id %}" class="mnx-btn" style="padding:6px 12px;font-size:11px;">VIEW</a>
+    </div>
+</div>
+{% empty %}
+<div class="mnx-empty">No users found.</div>
+{% endfor %}

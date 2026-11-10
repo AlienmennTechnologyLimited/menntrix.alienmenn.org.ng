@@ -1,0 +1,34 @@
+{% extends "emails/base_email.html" %}
+
+{% block category %}NOTIFICATION{% endblock %}
+
+{% block content %}
+<h2 style="margin:0 0 12px;font-size:20px;color:#ccff00;font-weight:400;letter-spacing:0.5px;">
+    {{ title|default:"You have a new notification" }}
+</h2>
+
+{% if actor %}
+<p style="margin:0 0 10px;color:#ccc;font-size:14px;line-height:1.6;">
+    From <strong style="color:#ccff00;font-weight:400;">{{ actor.username }}</strong>
+</p>
+{% endif %}
+
+{% if body %}
+<p style="margin:0 0 20px;color:#e0e0e0;font-size:15px;line-height:1.7;">
+    {{ body }}
+</p>
+{% endif %}
+{% endblock %}
+
+{% block cta %}
+{% if url %}
+<tr>
+    <td style="padding:0 26px 26px;">
+        <a href="https://menntrix.alienmenn.org.ng{{ url }}"
+           style="display:inline-block;background:#ccff00;color:#111;padding:12px 26px;border-radius:30px;text-decoration:none;font-size:14px;letter-spacing:0.5px;">
+            OPEN IN MENNTRIX
+        </a>
+    </td>
+</tr>
+{% endif %}
+{% endblock %}

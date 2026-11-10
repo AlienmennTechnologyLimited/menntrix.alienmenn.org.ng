@@ -1,0 +1,109 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}{{ message.subject|default:"Message" }} — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">{{ message.subject|default:"(no subject)" }}</h1>
+
+<div class="mnx-msg-view-meta">
+    <div><strong>From:</strong>
+        {% if message.sender %}{{ message.sender.username }}{% else %}(unknown){% endif %}
+    </div>
+    <div><strong>To:</strong>
+        {% if message.recipient %}{{ message.recipient.username }}
+        {% elif message.group %}Group: {{ message.group.name }}
+        {% else %}(no recipient){% endif %}
+    </div>
+    <div><strong>Date:</strong> {{ message.created_at|date:"M d, Y H:i" }}</div>
+    {% if message.is_starred %}<div><strong>★</strong> Starred</div>{% endif %}
+</div>
+
+<div class="mnx-msg-view-body">
+    {{ message.body|linebreaks }}
+</div>
+
+{% if attachments %}
+<div class="mnx-msg-view-attach">
+    <h3>Attachments ({{ attachments|length }})</h3>
+    <div class="mnx-attach-grid">
+
+        {% for a in attachments %}
+            <div class="mnx-attach-item mnx-attach-{{ a.category }}">
+
+                {# -------- TEXT -------- #}
+                {% if a.is_text %}
+                    <div class="mnx-attach-name">📝 Text snippet</div>
+                    <pre class="mnx-attach-text">{{ a.text_content }}</pre>
+
+                {# -------- LINK -------- #}
+                {% elif a.is_link %}
+                    <div class="mnx-attach-name">🔗 Link</div>
+                    <a href="{{ a.url }}" target="_blank" rel="noopener noreferrer"
+                       class="mnx-attach-link">{{ a.url }}</a>
+
+                {# -------- IMAGE -------- #}
+                {% elif a.is_image and a.file %}
+                    <div class="mnx-attach-name">🖼 {{ a.name|default:"image" }}</div>
+                    <a href="{{ a.file.url }}" target="_blank" rel="noopener noreferrer">
+                        <img src="{{ a.file.url }}" alt="{{ a.name }}"
+                             class="mnx-attach-image" loading="lazy">
+                    </a>
+                    <div class="mnx-attach-meta">{{ a.size_display }}</div>
+
+                {# -------- VIDEO -------- #}
+                {% elif a.is_video and a.file %}
+                    <div class="mnx-attach-name">🎬 {{ a.name|default:"video" }}</div>
+                    <video controls preload="metadata" class="mnx-attach-video">
+                        <source src="{{ a.file.url }}" type="{{ a.mime_type|default:'video/mp4' }}">
+                        Your browser does not support video.
+                    </video>
+                    <div class="mnx-attach-meta">{{ a.size_display }}</div>
+
+                {# -------- AUDIO -------- #}
+                {% elif a.is_audio and a.file %}
+                    <div class="mnx-attach-name">🎵 {{ a.name|default:"audio" }}</div>
+                    <audio controls preload="metadata" class="mnx-attach-audio">
+                        <source src="{{ a.file.url }}" type="{{ a.mime_type|default:'audio/mpeg' }}">
+                        Your browser does not support audio.
+                    </audio>
+                    <div class="mnx-attach-meta">{{ a.size_display }}</div>
+
+                {# -------- FILE / ZIP -------- #}
+                {% elif a.file %}
+                    <div class="mnx-attach-name">📎 {{ a.name|default:"file" }}</div>
+                    <a href="{{ a.file.url }}" download class="mnx-btn mnx-btn-primary"
+                       style="margin-top:6px;">DOWNLOAD</a>
+                    <div class="mnx-attach-meta">{{ a.size_display }}</div>
+
+                {% endif %}
+            </div>
+        {% endfor %}
+
+    </div>
+</div>
+{% endif %}
+
+<div class="mnx-msg-view-actions">
+    <a href="{% url 'message_compose' %}?reply_to={{ message.id }}" class="mnx-btn mnx-btn-primary">REPLY</a>
+
+    {% if message.recipient_id == user.id %}
+        <a href="{% url 'message_star' message.id %}" class="mnx-btn">
+            {% if message.is_starred %}UNSTAR{% else %}STAR{% endif %}
+        </a>
+    {% endif %}
+
+    <a href="{% url 'message_trash' message.id %}" class="mnx-btn mnx-btn-danger"
+       onclick="return confirm('Move to trash?')">TRASH</a>
+
+    <a href="{% url 'message_inbox' %}" class="mnx-btn">BACK TO INBOX</a>
+</div>
+{% endblock %}
+
+{% block fab %}
+<a href="{% url 'message_compose' %}" class="mnx-fab" title="Compose">✏</a>
+{% endblock %}

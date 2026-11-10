@@ -1,0 +1,65 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}People — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">PEOPLE</h1>
+<p class="mnx-sub">Find anyone. Connect with people you just met.</p>
+
+<div class="mnx-search">
+    <input type="text" id="peopleSearch" placeholder="SEARCH A CONNECTION ..." value="{{ q }}">
+    <button type="button" onclick="doSearch()" aria-label="Search">🔍</button>
+</div>
+
+<div id="peopleResults">
+    {% include "menntrix/_people_rows.html" with users=users connected_ids=connected_ids %}
+</div>
+
+<div id="loadMoreWrap" style="text-align:center;margin:20px 0;">
+    {% if users.has_next %}
+    <button class="mnx-btn" onclick="loadMore()">LOAD MORE</button>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block fab %}
+<a href="{% url 'people_search' %}" class="mnx-fab" title="Add people">+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentPage = 1;
+let hasNext = {% if users.has_next %}true{% else %}false{% endif %};
+function doSearch() {
+    const q = document.getElementById('peopleSearch').value.trim();
+    currentPage = 1;
+    fetch(`?q=${encodeURIComponent(q)}&page=1`, { headers: {'X-Requested-With': 'XMLHttpRequest'} })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('peopleResults').innerHTML = data.html;
+            hasNext = data.has_next;
+            document.getElementById('loadMoreWrap').style.display = hasNext ? 'block' : 'none';
+        });
+}
+function loadMore() {
+    if (!hasNext) return;
+    const q = document.getElementById('peopleSearch').value.trim();
+    currentPage += 1;
+    fetch(`?q=${encodeURIComponent(q)}&page=${currentPage}`, { headers: {'X-Requested-With': 'XMLHttpRequest'} })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('peopleResults').insertAdjacentHTML('beforeend', data.html);
+            hasNext = data.has_next;
+            if (!hasNext) document.getElementById('loadMoreWrap').style.display = 'none';
+        });
+}
+document.getElementById('peopleSearch').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); doSearch(); }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,330 @@
+/* ============================================================
+   MENNTRIX ADMIN — dark theme + lemon-green accents
+   ============================================================ */
+
+:root {
+    --mnx-bg: #1a1a1a;
+    --mnx-bg-2: #232323;
+    --mnx-border: #333;
+    --mnx-fg: #ffffff;
+    --mnx-fg-dim: #b8b8b8;
+    --mnx-accent: #ccff00;
+    --mnx-accent-dark: #9bc700;
+    --mnx-danger: #ff6b6b;
+}
+
+html, body {
+    background: var(--mnx-bg) !important;
+    color: var(--mnx-fg) !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+
+/* ---------- LINKS ---------- */
+a, a:visited {
+    color: var(--mnx-accent) !important;
+    text-decoration: none;
+}
+a:hover {
+    color: #ffffff !important;
+    text-decoration: underline;
+}
+
+/* ---------- HEADER ---------- */
+#header {
+    background: var(--mnx-bg-2) !important;
+    color: var(--mnx-fg) !important;
+    border-bottom: 2px solid var(--mnx-accent) !important;
+    padding: 14px 24px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+    color: var(--mnx-accent) !important;
+    font-size: 20px !important;
+    letter-spacing: 3px !important;
+    font-weight: 400 !important;
+}
+#user-tools a {
+    color: var(--mnx-fg-dim) !important;
+}
+#user-tools a:hover {
+    color: var(--mnx-accent) !important;
+}
+
+/* ---------- BREADCRUMBS ---------- */
+div.breadcrumbs {
+    background: #141414 !important;
+    color: var(--mnx-fg-dim) !important;
+    border-bottom: 1px solid var(--mnx-border) !important;
+    padding: 12px 24px !important;
+}
+div.breadcrumbs a {
+    color: var(--mnx-accent) !important;
+}
+
+/* ---------- MODULES / CARDS ---------- */
+.module {
+    background: var(--mnx-bg-2) !important;
+    border: 1px solid var(--mnx-border) !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+.module h2, .module caption, .inline-group h2 {
+    background: #141414 !important;
+    color: var(--mnx-accent) !important;
+    padding: 12px 16px !important;
+    letter-spacing: 1px !important;
+    font-weight: 400 !important;
+    border-bottom: 1px solid var(--mnx-border) !important;
+}
+.module table {
+    background: var(--mnx-bg-2) !important;
+    color: var(--mnx-fg) !important;
+}
+
+/* ---------- TABLES ---------- */
+table thead th {
+    background: #141414 !important;
+    color: var(--mnx-accent) !important;
+    border-bottom: 1px solid var(--mnx-border) !important;
+    letter-spacing: 0.5px !important;
+    font-weight: 400 !important;
+}
+table tbody tr {
+    background: var(--mnx-bg-2) !important;
+    color: var(--mnx-fg) !important;
+}
+table tbody tr:nth-child(even) {
+    background: #262626 !important;
+}
+table tbody tr:hover {
+    background: #2e2e2e !important;
+}
+td, th {
+    border-bottom: 1px solid var(--mnx-border) !important;
+    color: inherit !important;
+}
+
+/* ---------- BUTTONS ---------- */
+.button, input[type=submit], input[type=button], button {
+    background: var(--mnx-accent) !important;
+    color: #111 !important;
+    border: none !important;
+    border-radius: 30px !important;
+    padding: 10px 22px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    letter-spacing: 0.5px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    text-transform: uppercase !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+}
+.button:hover, input[type=submit]:hover, input[type=button]:hover, button:hover {
+    background: #ffffff !important;
+    box-shadow: 0 0 18px rgba(204, 255, 0, 0.4) !important;
+}
+.button.default, input[type=submit].default, .submit-row input.default {
+    background: var(--mnx-accent) !important;
+    color: #111 !important;
+}
+.button.default:hover {
+    background: #ddff44 !important;
+}
+
+/* Delete button */
+.deletelink, a.deletelink {
+    background: var(--mnx-danger) !important;
+    color: #ffffff !important;
+    border-radius: 30px !important;
+    padding: 10px 22px !important;
+    text-transform: uppercase !important;
+    font-size: 12px !important;
+}
+.deletelink:hover {
+    background: #ff5555 !important;
+    color: #ffffff !important;
+    text-decoration: none !important;
+}
+
+/* ---------- FORMS ---------- */
+input[type=text], input[type=email], input[type=password],
+input[type=number], input[type=url], input[type=tel],
+textarea, select {
+    background: #1a1a1a !important;
+    color: var(--mnx-fg) !important;
+    border: 1px solid var(--mnx-border) !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 14px !important;
+}
+input:focus, textarea:focus, select:focus {
+    border-color: var(--mnx-accent) !important;
+    box-shadow: 0 0 12px rgba(204, 255, 0, 0.25) !important;
+    outline: none !important;
+}
+label {
+    color: var(--mnx-fg-dim) !important;
+    font-size: 13px !important;
+    letter-spacing: 0.3px !important;
+}
+
+/* ---------- SELECTED ROWS ---------- */
+tr.selected {
+    background: rgba(204, 255, 0, 0.1) !important;
+}
+
+/* ---------- MESSAGES ---------- */
+.messagelist li {
+    background: var(--mnx-bg-2) !important;
+    color: var(--mnx-fg) !important;
+    border-left: 4px solid var(--mnx-accent) !important;
+    border-radius: 6px !important;
+    padding: 12px 16px !important;
+    margin-bottom: 8px !important;
+}
+.messagelist li.success { border-left-color: #4caf50 !important; }
+.messagelist li.warning { border-left-color: #ff9800 !important; }
+.messagelist li.error { border-left-color: var(--mnx-danger) !important; }
+
+/* ---------- PAGINATION ---------- */
+.paginator {
+    background: var(--mnx-bg-2) !important;
+    color: var(--mnx-fg) !important;
+    border: 1px solid var(--mnx-border) !important;
+    border-radius: 8px !important;
+    padding: 10px !important;
+}
+.paginator a, .paginator a:visited {
+    color: var(--mnx-accent) !important;
+}
+.paginator .this-page {
+    background: var(--mnx-accent) !important;
+    color: #111 !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+}
+
+/* ---------- CALENDAR / CLOCK ---------- */
+.calendarbox, .clockbox {
+    background: var(--mnx-bg-2) !important;
+    border: 1px solid var(--mnx-accent) !important;
+    color: var(--mnx-fg) !important;
+}
+.calendar td a, .timelist a {
+    color: var(--mnx-accent) !important;
+}
+.calendar td.selected a {
+    background: var(--mnx-accent) !important;
+    color: #111 !important;
+}
+
+/* ---------- LOGIN PAGE ---------- */
+body.login {
+    background: var(--mnx-bg) !important;
+}
+body.login #container {
+    background: var(--mnx-bg-2) !important;
+    border: 1px solid var(--mnx-border) !important;
+    border-radius: 12px !important;
+    padding: 30px !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6) !important;
+}
+body.login #header {
+    background: transparent !important;
+    border-bottom: none !important;
+    text-align: center !important;
+    padding: 0 0 20px 0 !important;
+}
+body.login #content {
+    padding: 0 !important;
+}
+body.login .submit-row {
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+}
+body.login .form-row {
+    border: none !important;
+}
+body.login #container {
+    max-width: 420px;
+    margin: 60px auto !important;
+}
+
+/* ---------- FILTERS SIDEBAR ---------- */
+#changelist-filter {
+    background: var(--mnx-bg-2) !important;
+    border-left: 1px solid var(--mnx-border) !important;
+}
+#changelist-filter h2 {
+    background: #141414 !important;
+    color: var(--mnx-accent) !important;
+}
+#changelist-filter a {
+    color: var(--mnx-fg-dim) !important;
+}
+#changelist-filter a:hover {
+    color: var(--mnx-accent) !important;
+}
+#changelist-filter li.selected {
+    border-left: 3px solid var(--mnx-accent) !important;
+    padding-left: 10px !important;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 767px) {
+    #header {
+        padding: 12px 16px !important;
+    }
+    #branding h1 {
+        font-size: 16px !important;
+        letter-spacing: 2px !important;
+    }
+    #user-tools {
+        font-size: 11px !important;
+        text-align: right !important;
+    }
+    div.breadcrumbs {
+        padding: 10px 16px !important;
+        font-size: 12px !important;
+    }
+    .module {
+        margin-bottom: 14px !important;
+    }
+    .module h2, .module caption {
+        font-size: 13px !important;
+        padding: 10px 12px !important;
+    }
+    table thead th {
+        font-size: 12px !important;
+    }
+    table tbody td, table tbody th {
+        font-size: 13px !important;
+        padding: 8px 6px !important;
+    }
+    .button, input[type=submit], input[type=button], button {
+        padding: 9px 18px !important;
+        font-size: 11px !important;
+    }
+    body.login #container {
+        max-width: calc(100vw - 24px) !important;
+        margin: 30px auto !important;
+        padding: 22px 18px !important;
+    }
+}
+
+/* ---------- SCROLLBAR ---------- */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #1a1a1a;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #262626;
+}

@@ -1,0 +1,37 @@
+{% extends "emails/base_email.html" %}
+
+{% block category %}WELCOME{% endblock %}
+
+{% block content %}
+<h2 style="margin:0 0 12px;font-size:22px;color:#ccff00;font-weight:400;letter-spacing:0.5px;">
+    Welcome to MENNTRIX
+</h2>
+
+<p style="margin:0 0 16px;color:#e0e0e0;font-size:15px;line-height:1.7;">
+    Hi {{ user.firstname|default:user.username }},<br><br>
+    Your MENNTRIX account is ready. You can now:
+</p>
+
+<ul style="margin:0 0 20px;padding-left:20px;color:#e0e0e0;font-size:14px;line-height:1.9;">
+    <li>Message anyone — with voice, video, images, PDFs, and links</li>
+    <li>Call people 1-to-1 in voice or video</li>
+    <li>Create meetings and share the link</li>
+    <li>Go live on your own channel</li>
+    <li>Find and connect with new people</li>
+</ul>
+
+<p style="margin:0;color:#ccc;font-size:13px;line-height:1.6;">
+    Open MENNTRIX and start connecting.
+</p>
+{% endblock %}
+
+{% block cta %}
+<tr>
+    <td style="padding:0 26px 26px;">
+        <a href="https://menntrix.alienmenn.org.ng/dashboard/"
+           style="display:inline-block;background:#ccff00;color:#111;padding:12px 26px;border-radius:30px;text-decoration:none;font-size:14px;letter-spacing:0.5px;">
+            OPEN MENNTRIX
+        </a>
+    </td>
+</tr>
+{% endblock %}

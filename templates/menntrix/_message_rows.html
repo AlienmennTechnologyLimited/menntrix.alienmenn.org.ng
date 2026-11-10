@@ -1,0 +1,66 @@
+{% load static %}
+{% for m in messages %}
+<div class="mnx-msg {% if not m.is_read and m.recipient_id == user.id %}mnx-msg-unread{% endif %}">
+    <div class="mnx-msg-body">
+        <a href="{% url 'message_view' m.id %}" class="mnx-msg-subject">
+            {% if m.is_starred %}★ {% endif %}{{ m.subject|default:"(no subject)" }}
+        </a>
+        <div class="mnx-msg-meta">
+            {% if folder == "sent" or folder == "drafts" %}
+                {% if m.recipient %}
+                    To: {{ m.recipient.username }}
+                {% elif m.group %}
+                    To group: {{ m.group.name }}
+                {% else %}
+                    To: (no recipient)
+                {% endif %}
+            {% else %}
+                From: {% if m.sender %}{{ m.sender.username }}{% else %}(unknown){% endif %}
+            {% endif %}
+            · {{ m.created_at|date:"M d, H:i" }}
+            {% if folder == "drafts" %} · <em>Draft</em>{% endif %}
+        </div>
+    </div>
+
+    <div class="mnx-msg-actions">
+        {# ---------- DRAFTS ---------- #}
+        {% if folder == "drafts" %}
+            <a href="{% url 'message_compose' %}?draft={{ m.id }}" class="mnx-btn"
+               style="padding:5px 10px;font-size:10px;">EDIT</a>
+            <a href="{% url 'draft_send' m.id %}" class="mnx-btn mnx-btn-primary"
+               style="padding:5px 10px;font-size:10px;"
+               onclick="return confirm('Send this draft now?')">SEND</a>
+            <a href="{% url 'draft_delete' m.id %}" class="mnx-btn"
+               style="padding:5px 10px;font-size:10px;border-color:#ff6b6b;color:#ff6b6b;"
+               onclick="return confirm('Delete this draft permanently?')">DELETE</a>
+
+        {# ---------- TRASH ---------- #}
+        {% elif folder == "trash" %}
+            <a href="{% url 'message_restore' m.id %}" class="mnx-btn mnx-btn-primary"
+               style="padding:5px 10px;font-size:10px;">RESTORE</a>
+            <a href="{% url 'message_delete_forever' m.id %}" class="mnx-btn"
+               style="padding:5px 10px;font-size:10px;border-color:#ff6b6b;color:#ff6b6b;"
+               onclick="return confirm('Delete forever? This cannot be undone.')">DELETE FOREVER</a>
+
+        {# ---------- INBOX / STARRED ---------- #}
+        {% elif m.recipient_id == user.id %}
+            <a href="{% url 'message_star' m.id %}" class="mnx-btn"
+               style="padding:5px 10px;font-size:10px;">
+               {% if m.is_starred %}UNSTAR{% else %}STAR{% endif %}
+            </a>
+            <a href="{% url 'message_trash' m.id %}" class="mnx-btn"
+               style="padding:5px 10px;font-size:10px;border-color:#ff6b6b;color:#ff6b6b;">TRASH</a>
+
+        {# ---------- SENT ---------- #}
+        {% else %}
+            <a href="{% url 'message_trash' m.id %}" class="mnx-btn"
+               style="padding:5px 10px;font-size:10px;border-color:#ff6b6b;color:#ff6b6b;">TRASH</a>
+        {% endif %}
+
+        <a href="{% url 'message_view' m.id %}" class="mnx-btn"
+           style="padding:5px 10px;font-size:10px;">VIEW</a>
+    </div>
+</div>
+{% empty %}
+<div class="mnx-empty">No messages in {{ folder }}.</div>
+{% endfor %}

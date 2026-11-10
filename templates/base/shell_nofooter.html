@@ -1,0 +1,37 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}MENNTRIX{% endblock %}</title>
+    <meta name="description" content="MENNTRIX — THE MENNTRIX OPENSOURCE PROJECT">
+    <link href="{% static 'css/main2.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'css/app-Launcher.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'css/menntrix.css' %}" rel="stylesheet" type="text/css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+<div class="container">
+
+    <div class="navContent">
+        <a href="{% url 'dashboard' %}">
+            <img src="{% static 'images/logo.gif' %}" alt="MENNTRIX" class="logoImg">
+        </a>
+
+        <div class="navMenuDiv">
+            <div class="NAVtEXT001"><a href="{% url 'dashboard' %}">DASHBOARD</a></div>
+            <div class="NAVtEXT001"><a href="{% url 'menu' %}">MENU</a></div>
+            <div class="NAVtEXT001"><a href="{% url 'setting' %}">SETTING</a></div>
+            <div class="NAVtEXT001">
+                <a href="{% url 'logout' %}" onclick="return confirm('Sign out of MENNTRIX?')" style="color:#ff6b6b;">SIGNOUT</a>
+            </div>
+        </div>
+    </div>
+
+    {% block content %}{% endblock %}
+
+</div>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

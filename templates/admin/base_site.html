@@ -1,0 +1,17 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | MENNTRIX Admin{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">MENNTRIX ADMIN</a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link href="{% static 'css/admin-menntrix.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base/shell.html" %}
+{% load static %}
+
+{% block title %}MENNTRIX — THE MENNTRIX OPENSOURCE PROJECT{% endblock %}
+
+{% block content %}
+<div class="menntrix-splash">
+    <div class="menntrix-splash-inner">
+        <h1 class="menntrix-logo-text">MENNTRIX</h1>
+        <p class="menntrix-slogan">THE MENNTRIX OPENSOURCE PROJECT</p>
+        <p class="menntrix-tag">Connect with people. Do business.</p>
+
+        <div class="menntrix-splash-actions">
+            <div class="universal"><a href="{% url 'signup' %}">CREATE ACCOUNT</a></div>
+            <div class="universal"><a href="{% url 'signin' %}">SIGN IN</a></div>
+        </div>
+
+        <p class="menntrix-open-note">
+            Open source. Free to download. Free to use. Free to build on.
+        </p>
+    </div>
+</div>
+
+<script>
+    // Auto-forward to home after 3 seconds (like your existing Alienmenn splash)
+    setTimeout(function () {
+        window.location.href = "{% url 'home' %}";
+    }, 3000);
+</script>
+{% endblock %}

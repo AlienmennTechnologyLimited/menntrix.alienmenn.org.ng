@@ -1,0 +1,36 @@
+{% extends "emails/base_email.html" %}
+
+{% block category %}SECURITY{% endblock %}
+
+{% block content %}
+<h2 style="margin:0 0 12px;font-size:20px;color:#ff9800;font-weight:400;letter-spacing:0.5px;">
+    ⚠ New login detected
+</h2>
+
+<p style="margin:0 0 16px;color:#e0e0e0;font-size:15px;line-height:1.7;">
+    A new sign-in to your MENNTRIX account was detected.
+</p>
+
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="background:#1a1a1a;border-radius:8px;padding:14px 16px;width:100%;margin-bottom:18px;">
+    <tr><td style="padding:6px 0;color:#888;font-size:13px;">Country</td><td style="padding:6px 0;color:#ccff00;font-size:13px;text-align:right;">{{ country|default:"—" }}</td></tr>
+    <tr><td style="padding:6px 0;color:#888;font-size:13px;">City</td><td style="padding:6px 0;color:#ccff00;font-size:13px;text-align:right;">{{ city|default:"—" }}</td></tr>
+    <tr><td style="padding:6px 0;color:#888;font-size:13px;">IP</td><td style="padding:6px 0;color:#ccff00;font-size:13px;text-align:right;">{{ ip_address|default:"—" }}</td></tr>
+    <tr><td style="padding:6px 0;color:#888;font-size:13px;">Time</td><td style="padding:6px 0;color:#ccff00;font-size:13px;text-align:right;">{{ detected_at|default:"—" }}</td></tr>
+</table>
+
+<p style="margin:0;color:#ccc;font-size:13px;line-height:1.6;">
+    If this was you, no action is needed.<br>
+    If this wasn't you, change your password immediately.
+</p>
+{% endblock %}
+
+{% block cta %}
+<tr>
+    <td style="padding:0 26px 26px;">
+        <a href="https://menntrix.alienmenn.org.ng/setting/security/"
+           style="display:inline-block;background:#ccff00;color:#111;padding:12px 26px;border-radius:30px;text-decoration:none;font-size:14px;letter-spacing:0.5px;">
+            CHANGE PASSWORD
+        </a>
+    </td>
+</tr>
+{% endblock %}

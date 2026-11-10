@@ -1,0 +1,59 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Personal Information — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_settings_tiles.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">PERSONAL INFORMATION</h1>
+<p class="mnx-sub">Your name, contact details, and country.</p>
+
+{% include "menntrix/_settings_tabs.html" %}
+
+<div class="mnx-settings-card">
+
+    {% if error_message %}<div class="error-message">{{ error_message }}</div>{% endif %}
+    {% if success_message %}<div class="success-message">{{ success_message }}</div>{% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label class="mnx-field-label">First name</label>
+        <input name="firstname" type="text" required class="formAccountStyle" value="{{ user.firstname }}">
+
+        <label class="mnx-field-label">Middle name</label>
+        <input name="middlename" type="text" class="formAccountStyle" value="{{ user.middlename }}">
+
+        <label class="mnx-field-label">Last name</label>
+        <input name="lastname" type="text" required class="formAccountStyle" value="{{ user.lastname }}">
+
+        <label class="mnx-field-label">Email (read-only)</label>
+        <input name="email" type="email" class="formAccountStyle" value="{{ user.email }}" readonly>
+
+        <label class="mnx-field-label">Phone</label>
+        <input name="mobile" type="tel" class="formAccountStyle" value="{{ user.mobile }}">
+
+        <label class="mnx-field-label">Gender</label>
+        <select name="gender" class="formAccountStyle">
+            <option value="Male" {% if user.gender == "Male" %}selected{% endif %}>Male</option>
+            <option value="Female" {% if user.gender == "Female" %}selected{% endif %}>Female</option>
+            <option value="Other" {% if user.gender == "Other" %}selected{% endif %}>Other</option>
+        </select>
+
+        <label class="mnx-field-label">Country</label>
+        <input name="country" type="text" class="formAccountStyle" value="{{ user.country }}">
+
+        <label class="mnx-field-label">Current password (to confirm)</label>
+        <input name="currentpassword" type="password" required class="formAccountStylepassword"
+               placeholder="Your current password">
+
+        <div style="margin-top:16px;">
+            <input type="submit" value="UPDATE" class="ButtonStyle">
+        </div>
+    </form>
+
+</div>
+{% endblock %}

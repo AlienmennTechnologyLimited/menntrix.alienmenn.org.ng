@@ -1,0 +1,30 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Report — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<div class="menntrix-form-wrap" style="background:#232323;border:1px solid #333;margin:0;">
+    <h2 class="menntrix-form-title">REPORT @{{ peer.username }}</h2>
+    <p class="menntrix-form-sub">Tell us what happened. Your report is private.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <label class="mnx-field-label">Reason</label>
+        <textarea name="reason" rows="5" required class="formAccountStyle"
+                  placeholder="Describe what happened..."></textarea>
+
+        <div style="margin-top:16px;">
+            <input type="submit" value="SUBMIT REPORT" class="ButtonStyle">
+        </div>
+    </form>
+
+    <p style="text-align:center;margin-top:20px;">
+        <a href="{% url 'people_search' %}" style="color:#ccff00;">Cancel</a>
+    </p>
+</div>
+{% endblock %}

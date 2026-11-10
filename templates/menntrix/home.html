@@ -1,0 +1,483 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="keywords" content="MENNTRIX - THE OPENSOURCE COMMUNICATOR PROJECT...">
+<meta name="viewport" content="width=device-width">
+<title>THE OPENSOURCE COMMUNICATOR PROJECT</title>
+
+
+<link href="{% static 'css/main2.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'css/app-Launcher.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'css/menntrix.css' %}" rel="stylesheet" type="text/css">
+<!-- style240 -->
+
+
+<script type='text/javascript' src='https://platform-api.sharethis.com/js/sharethis.js#property=65edc5a41a23d00019c3da22&product=inline-share-buttons' async='async'></script>
+
+<style type="text/css">
+td img {display: block;}
+</style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="navContent">
+            <a href="{% url 'home' %}"><img src="{% static 'images/logo.gif' %}" alt="logo" class="logoImg"></a>
+
+            <div class="navMenuDiv">
+                <div class="NAVtEXT001"><a href="{% url 'dashboard' %}">CONNECT</a></div>
+
+                <div class="NAVtEXT001">
+                    {% if request.session.MM_Username %}
+                        <a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to sign out?')" style="color: #ff6b6b;">SIGNOUT</a>
+                    {% else %}
+                        <a href="{% url 'signin' %}">SIGNIN</a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="menusection">
+                <div class="app-launcher-container">
+                    <button class="app-launcher-btn" id="appLauncherBtn" title="Alienmenn Projects">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path d="M6,8c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM12,20c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM6,20c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM6,14c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM12,14c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM16,6c0,1.1 0.9,2 2,2s2,-0.9 2,-2 -0.9,-2 -2,-2 -2,0.9 -2,2zM12,8c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM18,14c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM18,20c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <a href="{% url 'menu' %}"><img src="{% static 'images/menu.fw.png' %}" alt="" class="menu01"></a>
+            </div>
+        </div>
+    
+    
+    
+        <div class="aramidediv">
+            <div class="aramidone">
+                <div class="aramidelogodiv">
+                    <p><h1>THE OPENSOURCE COMMUNICATOR PROJECT </h1>
+                </div>
+                <div class="aramidebox1 aramidetext">Connect with people. Do business.<br>
+            Voice calls. Video calls. Live channels. Group meetings. All in one simple app ...</div>
+                </p>
+                <div class="universal"><a href="{% url 'dashboard' %}">CONNECT NOW</a></div>
+            </div>
+            <div class="aramidtwo">
+                <img src="{% static '_images/logo5/MENNTRIX.fw.png' %}" alt="" class="aramidelogoimg">
+            </div>
+        </div>
+    <br>
+    
+    <div class="middleDiv01">
+        <div class="DarkDivContainer01">
+        <div class="DemandPolutionCX">
+            <h2 class="capsulator01">MENNTRIX OPENSOURCE VERSION IS FREE TO DOWNLOAD, USE, AND BUILD ON</h2>
+            <p>SUPERCHARGE YOUR COMMUNITY WITH FREE AND AFFORDABLE INTERNET CALLING, MESSAGING, MEETINGS AND LIVE CHANNELS TOOL FROM ALIENMENN ...</p>
+            <div class="sharethis-inline-share-buttons"></div><br>
+        </div>
+        </div>
+    </div>
+    
+    <div class="Greydivoverlay">
+        <div class="middleDiv02">
+        <h2>VIDEO PRESENTATION</h2>
+        <video class="videoimageShade" controls>
+            <source src="{% static 'assets/presentationVideo/alienmenn.mp4' %}" type="video/mp4" />
+        </video>
+        <p>&nbsp;</p>
+        </div>
+    </div>
+
+    <div class="menntrix-features">
+
+    <div class="menntrix-feature">
+        <div class="menntrix-feature-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                 fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+            </svg>
+        </div>
+        <h3>MESSAGE</h3>
+        <p>Email-style inbox. Text, voice, video, images, PDFs, ZIPs, links.</p>
+    </div>
+
+    <div class="menntrix-feature">
+        <div class="menntrix-feature-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                 fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+        </div>
+        <h3>CALL</h3>
+        <p>One-to-one voice or video. Switch between them mid-call.</p>
+    </div>
+
+    <div class="menntrix-feature">
+        <div class="menntrix-feature-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                 fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="23 7 16 12 23 17 23 7"/>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+            </svg>
+        </div>
+        <h3>CHANNEL</h3>
+        <p>Go live. Let people watch and comment in real time.</p>
+    </div>
+
+    <div class="menntrix-feature">
+        <div class="menntrix-feature-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                 fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+        </div>
+        <h3>MEETING</h3>
+        <p>Create a meeting. Share a link. Talk to your group.</p>
+    </div>
+
+</div>
+
+    <div class="Greydivoverlay">
+    <div class="contentDSVDiv01"></div>
+    <div class="contentDSVDiv03">
+        <div class="DemandPolution66C">
+            <h2 class="capsulator01">MENNTRIX  PROJECTS</h2>
+            <p> menntrix is a free opensource internet communication tool that can be deployed and used for any community freely under an opensource agreement</p>
+            <div class="universal"><strong>View project</strong></div>
+        </div>
+        <div class="DemandPolution66C">
+            <h2 class="capsulator01">DOWNLOAD MENNTRIX</h2>
+            <p>you can download the opensource version of MENNTRIX for free use in your community. we also offer deployment supports (t&c apply)</p>
+            <div class="universal"><strong>Download now</strong></div>
+        </div>
+        <div class="DemandPolution66C">
+            <h2 class="capsulator01">ABOUT MENNTRIX</h2>
+            <p>Menntrix is a free community calling, voice and video, meeting and channel tool  created by alienmenn and other contributors to make space accessible under an opensource agreement</p>
+            <div class="universal"><a href="{% url 'dashboard' %}"><strong>See more</strong></a></div>
+        </div>
+        </div>
+        <p>&nbsp;</p>
+    </div>
+
+    <div class="footerDiv">
+        <p>&nbsp;</p>
+        <div class="navMainDiv2">
+        <img src="{% static 'images/LogoFooter.png' %}" class="LogoDivFootAlign">
+        </div>
+        <div class="navMainDiv2">
+        20 Adenyi street, Alagbado, Lagos, Nigeria <br>
+        Tel: +2348168071759<br>
+        Email: info@Alienmenn.org.ng
+        </div>
+        <div class="navMainDiv2">
+        <span class="fotterGreyText">© Alienmenn. All right reserved</span><br>
+        </div>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+    </div>
+    
+
+    <!-- App Launcher Overlay & Menu -->
+    <div class="app-launcher-overlay" id="appLauncherOverlay"></div>
+
+    <div class="app-launcher-menu" id="appLauncherMenu">
+        <div class="app-menu-header">
+            Alienmenn Project
+        </div>
+        
+        <div class="apps-grid" id="appsGrid">
+            <!-- 24 Projects will be loaded here -->
+        </div>
+        
+        <div class="app-menu-footer">
+            <a href="https://alienmenn.org.ng" target="_blank">🌐 Return to Alienmenn HomePage</a>
+        </div>
+    </div>
+    </div> <!-- End of container -->
+    <script>
+        // ============================================
+        // ALIENMENN PROJECTS - 24 APPS
+        // ============================================
+
+        const alienmennProjects = [
+            // Row 1 - Main Platforms
+            {
+                id: 1,
+                name: "9X",
+                url: "https://9X.alienmenn.org.ng",
+                icon: "{% static 'images.icon/9X.png' %}",
+            },
+            {
+                id: 2,
+                name: "360",
+                url: "https://360.alienmenn.org.ng",
+                icon: "{% static 'images.icon/360.png' %}",
+            },
+            {
+                id: 3,
+                name: "AIRFORCE",
+                url: "https://airforce.alienmenn.org.ng",
+                icon: "{% static 'images.icon/AIRFORCE.png' %}",
+            },
+            {
+                id: 4,
+                name: "AIRGHOM",
+                url: "https://airghom.alienmenn.org.ng",
+                icon: "{% static 'images.icon/AIRGHOM.png' %}",
+            },
+            
+            // Row 2 - Additional Platforms
+            {
+                id: 5,
+                name: "ALIENWEER",
+                url: "https://alienweer.alienmenn.org.ng",
+                icon: "{% static 'images.icon/ALIENWEER.png' %}",
+            },
+            {
+                id: 6,
+                name: "ANGELWOEMENN",
+                url: "https://angelwoemenn.alienmenn.org.ng",
+                icon: "{% static 'images.icon/ANGELWOEMENN.png' %}",
+            },
+            {
+                id: 7,
+                name: "BUILD",
+                url: "https://build.alienmenn.org.ng",
+                icon: "{% static 'images.icon/BUILD.png' %}",
+            },
+            {
+                id: 8,
+                name: "CITIZEN",
+                url: "https://citizen.alienmenn.org.ng",
+                icon: "{% static 'images.icon/CITIZEN.png' %}",
+            },
+            
+            // Row 3 - Space & Technology
+            {
+                id: 9,
+                name: "CYBERG",
+                url: "https://cyberg.alienmenn.org.ng",
+                icon: "{% static 'images.icon/CYBERG.png' %}",
+            },
+            {
+                id: 10,
+                name: "DURIONARCH",
+                url: "https://durionarch.alienmenn.org.ng",
+                icon: "{% static 'images.icon/DURIONARCH.png' %}",
+            },
+            {
+                id: 11,
+            name: "ETHADIUM",
+                url: "https://ethadium.alienmenn.org.ng",
+                icon: "{% static 'images.icon/ETHADIUM.png' %}",
+            },
+            {
+                id: 12,
+                name: "GENESIS",
+                url: "https://genesis.alienmenn.org.ng",
+                icon: "{% static 'images.icon/GENESIS.png' %}",
+            },
+            
+            // Row 4 - More Technology
+            {
+                id: 13,
+                name: "GEO",
+                url: "https://geo.alienmenn.org.ng",
+                icon: "{% static 'images.icon/GEO.png' %}",
+            },
+            {
+                id: 14,
+                name: "HARDWARE",
+                url: "https://hardware.alienmenn.org.ng",
+                icon: "{% static 'images.icon/HARDWARE.png' %}",
+            },
+            {
+                id: 15,
+                name: "IR",
+                url: "https://ir.alienmenn.org.ng",
+                icon: "{% static 'images.icon/IR.png' %}",
+            },
+            {
+                id: 16,
+                name: "MAKERWEER",
+                url: "https://makerweer.alienmenn.org.ng",
+                icon: "{% static 'images.icon/MAKERWEER.png' %}",
+            },
+            
+            // Row 5 - Additional Services
+            {
+                id: 17,
+                name: "MANNA",
+                url: "https://manna.alienmenn.org.ng",
+                icon: "{% static 'images.icon/MANNA.png' %}",
+            },
+            {
+                id: 18,
+                name: "MECCA",
+                url: "https://mecca.alienmenn.org.ng",
+                icon: "{% static 'images.icon/MECCA.png' %}",
+            },
+            {
+                id: 19,
+                name: "NGIN",
+                url: "https://ngin.alienmenn.org.ng",
+                icon: "{% static 'images.icon/NGIN.png' %}",
+            },
+            {
+                id: 20,
+                name: "ROBOT",
+                url: "https://robot.alienmenn.org.ng",
+                icon: "{% static 'images.icon/ROBOT.png' %}",
+            },
+            
+            // Row 6 - Final Set
+            {
+                id: 21,
+                name: "SATELLITE",
+                url: "https://satellite.alienmenn.org.ng",
+                icon: "{% static 'images.icon/SATELLITE.png' %}",
+            },
+            {
+                id: 22,
+                name: "SPACESHIP",
+                url: "https://spaceship.alienmenn.org.ng",
+                icon: "{% static 'images.icon/SPACESHIP.png' %}",
+            },
+            {
+                id: 23,
+                name: "UASA",
+                url: "https://uasa.alienmenn.org.ng",
+                icon: "{% static 'images.icon/UASA.png' %}",
+            },
+            {
+                id: 24,
+                name: "USR",
+                url: "https://usr.alienmenn.org.ng",
+                icon: "{% static 'images.icon/USR.png' %}",
+            }
+        ];
+
+        // Function to render the apps grid
+        function renderAppsGrid(filterText = '') {
+            const gridContainer = document.getElementById('appsGrid');
+            if (!gridContainer) return;
+            
+            let filteredProjects = alienmennProjects;
+            
+            if (filterText) {
+                filteredProjects = alienmennProjects.filter(project => 
+                    project.name.toLowerCase().includes(filterText.toLowerCase()) ||
+                    project.domain.toLowerCase().includes(filterText.toLowerCase()) ||
+                    project.category.toLowerCase().includes(filterText.toLowerCase())
+                );
+            }
+            
+            if (filteredProjects.length === 0) {
+                gridContainer.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">
+                        No projects found matching "${filterText}"
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            filteredProjects.forEach(project => {
+                html += `
+                    <a href="${project.url}" class="app-item" target="_blank" rel="noopener noreferrer">
+                        <div class="app-icon">
+                            <img src="${project.icon}" alt="${project.name}" 
+                                onerror="this.src='{% static 'images/logo.gif' %}'">
+                        </div>
+                        <div class="app-name">${project.name}</div>
+                        <div class="app-domain">${project.domain}</div>
+                    </a>
+                `;
+            });
+            
+            gridContainer.innerHTML = html;
+        }
+
+        // App Launcher functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const launcherBtn = document.getElementById('appLauncherBtn');
+            const launcherMenu = document.getElementById('appLauncherMenu');
+            const overlay = document.getElementById('appLauncherOverlay');
+            const searchInput = document.getElementById('appSearchInput');
+            
+            // Render initial grid
+            renderAppsGrid();
+            
+            // Toggle menu
+            function toggleMenu() {
+                launcherMenu.classList.toggle('show');
+                overlay.classList.toggle('show');
+                if (launcherMenu.classList.contains('show') && searchInput) {
+                    setTimeout(() => searchInput.focus(), 100);
+                }
+            }
+            
+            function closeMenu() {
+                launcherMenu.classList.remove('show');
+                overlay.classList.remove('show');
+                if (searchInput) {
+                    searchInput.value = '';
+                    renderAppsGrid();
+                }
+            }
+            
+            if (launcherBtn) {
+                launcherBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleMenu();
+                });
+            }
+            
+            if (overlay) {
+                overlay.addEventListener('click', closeMenu);
+            }
+            
+            // Search functionality
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    renderAppsGrid(e.target.value);
+                });
+            }
+            
+            // Close menu on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && launcherMenu.classList.contains('show')) {
+                    closeMenu();
+                }
+            });
+            
+            // Prevent menu from closing when clicking inside it
+            if (launcherMenu) {
+                launcherMenu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+        });
+
+        // Update URLs for internal links
+        function updateInternalLinks() {
+            // Update dashboard link to use Django URL
+            const dashboardProject = alienmennProjects.find(p => p.name === "Dashboard");
+            if (dashboardProject) {
+                dashboardProject.url = "{% url 'dashboard' %}";
+            }
+        }
+    </script>
+
+</body>
+</html>

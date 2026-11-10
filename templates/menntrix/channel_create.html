@@ -1,0 +1,49 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Create Channel — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<div class="menntrix-form-wrap" style="background:#232323;border:1px solid #333;margin:0;">
+    <h2 class="menntrix-form-title">CREATE A CHANNEL</h2>
+    <p class="menntrix-form-sub">Your channel gets a unique link: /channel/&lt;name&gt;/</p>
+
+    {% if messages %}
+        {% for m in messages %}
+            <div class="{% if m.tags == 'error' %}error-message{% else %}success-message{% endif %}">{{ m }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label class="mnx-field-label">Channel name (letters, numbers, dashes only)</label>
+        <input type="text" name="slug" required class="formAccountStyle"
+               pattern="[A-Za-z0-9\-]+"
+               title="Letters, numbers, and dashes only"
+               value="{{ slug }}"
+               placeholder="e.g. henry or tech-talk">
+
+        <label class="mnx-field-label">Channel title (what people see)</label>
+        <input type="text" name="title" class="formAccountStyle"
+               value="{{ title }}"
+               placeholder="e.g. Henry's Live Tech Talk">
+
+        <label class="mnx-field-label">Description (optional)</label>
+        <textarea name="description" rows="4" class="formAccountStyle"
+                  placeholder="What is this channel about?"></textarea>
+
+        <div style="margin-top:16px;">
+            <input type="submit" value="CREATE CHANNEL" class="ButtonStyle">
+        </div>
+    </form>
+
+    <p style="text-align:center;margin-top:20px;">
+        <a href="{% url 'channel_browse' %}" style="color:#ccff00;">Back to channels</a>
+    </p>
+</div>
+{% endblock %}

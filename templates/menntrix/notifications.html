@@ -1,0 +1,36 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Notifications — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">NOTIFICATIONS</h1>
+<p class="mnx-sub">Everything that happened while you were away.</p>
+
+<div class="mnx-clear-row" style="margin-top:0;">
+    <a href="{% url 'notifications_mark_all_read' %}" class="mnx-btn">MARK ALL AS READ</a>
+</div>
+
+{% for n in notifications %}
+<a href="{% if n.url %}{{ n.url }}{% else %}#{% endif %}" class="mnx-notif-row {% if not n.is_read %}mnx-notif-unread{% endif %}">
+    <div class="mnx-notif-icon mnx-notif-{{ n.verb }}">
+        {% if n.verb == "message" %}✉{% elif n.verb == "call" %}☎{% elif n.verb == "meeting" or n.verb == "meeting_invite" %}👥{% elif n.verb == "channel_live" or n.verb == "channel_comment" %}▶{% elif n.verb == "connection_add" or n.verb == "connection_remove" %}👤{% elif n.verb == "security" %}⚠{% elif n.verb == "welcome" %}✦{% else %}●{% endif %}
+    </div>
+    <div class="mnx-notif-body">
+        <div class="mnx-notif-title">{{ n.title }}</div>
+        {% if n.body %}<div class="mnx-notif-text">{{ n.body }}</div>{% endif %}
+        <div class="mnx-notif-meta">
+            {{ n.created_at|date:"M d, Y H:i" }}
+            {% if n.actor %} · from @{{ n.actor.username }}{% endif %}
+        </div>
+    </div>
+    {% if not n.is_read %}<span class="mnx-notif-dot"></span>{% endif %}
+</a>
+{% empty %}
+<div class="mnx-empty">No notifications yet.</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,395 @@
+/* Theme Colors & Global Settings */
+:root {
+    --lemon-green: #ccff00;
+    --grey: #333333;
+    --white: #ffffff;
+    --grey-dark: #1a1a1a;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--grey);
+    color: var(--white);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    font-size: 18px; /* INCREASED from default 16px */
+}
+
+.hone{
+    margin-top: 40px;
+    font-size: 32px; /* INCREASED */
+}
+
+.aramidelogodiv{
+    width: 80%;
+    margin-top: 40px;
+    font-size: 28px; /* INCREASED */
+}
+
+.aramidediv{
+    display: flex;
+    justify-content: space-between;
+}
+
+.aramidone{
+    width: 60%;
+    height: 100%;
+}
+
+.aramidelogoimg{
+    height: 90%;
+    width: 90%;
+    float: right;
+}
+
+/* Accessibility: Bold Links and Template Views */
+a, strong, .a234ASDWE22, .a234ASDWER, h1, h2, h3, .capsulator01 {
+    font-weight: 800 !important;
+}
+
+a {
+    color: var(--lemon-green);
+    text-decoration: none;
+    transition: 0.3s;
+    font-size: 18px; /* INCREASED */
+}
+
+a:hover {
+    color: var(--white);
+}
+
+/* Headings - Increased Sizes */
+h1 {
+    font-size: 36px; /* INCREASED */
+}
+
+h2 {
+    font-size: 28px; /* INCREASED */
+}
+
+h3 {
+    font-size: 24px; /* INCREASED */
+}
+
+p, li, .text-content {
+    font-size: 18px; /* INCREASED */
+    line-height: 1.7; /* IMPROVED readability */
+}
+
+/* Layout Containers */
+.container, .containerAccount {
+    width: 100%;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+/* Navigation */
+.navContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0 ;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--lemon-green);
+}
+
+.navMenuDiv {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.menusection {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logoImg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Form Styles */
+.formAccountStyle, .formAccountStylepassword {
+    width: 100%;
+    padding: 14px; /* INCREASED */
+    margin: 10px 0;
+    background: var(--white);
+    border: 1px solid var(--lemon-green);
+    color: var(--grey);
+    border-radius: 4px;
+    font-size: 17px; /* INCREASED */
+}
+
+.ButtonStyle {
+    background-color: var(--lemon-green);
+    color: var(--grey);
+    border: none;
+    padding: 16px 32px; /* INCREASED */
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    text-transform: uppercase;
+    transition: 0.3s;
+    font-size: 18px; /* INCREASED */
+}
+
+.ButtonStyle:hover {
+    background-color: var(--white);
+}
+
+/* Menu & Account Links */
+.a234ASDWER {
+    background-color: var(--lemon-green);
+    color: var(--grey);
+    padding: 14px; /* INCREASED */
+    margin-top: 20px;
+    font-size: 22px; /* INCREASED */
+    font-weight: bold;
+}
+
+.a234ASDWE22 {
+    padding: 16px; /* INCREASED */
+    border-bottom: 1px solid #333;
+    background: rgba(204, 255, 0, 0.05);
+    font-size: 18px; /* INCREASED */
+}
+
+.DarkDivContainer01{
+    background: #1a1a1a;
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid #333;
+}
+
+/* Footer */
+.footerDiv {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: var(--grey);
+    margin-top: 50px;
+    font-size: 16px; /* INCREASED */
+    border-top: 2px solid var(--lemon-green);
+}
+
+.LogoDivFootAlign {
+    max-width: 100%;
+    height: auto;
+    filter: brightness(0) invert(1); /* Makes footer logo white if needed */
+}
+
+/* Video & Images */
+.videoimageShade {
+    width: 100%;
+    border: 3px solid var(--lemon-green);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.opensourcenow {
+    display: flex;
+    justify-content: space-between;
+    min-width: 240px;
+    max-width: 100%;
+}
+
+.containuniversal{
+    justify-content: space-between;
+    display: flex;
+    gap: 5px;
+    width: 450px;
+}
+
+.universal {
+    width: 250px;
+    height: 60px;
+    background-color: #666666;
+    border-radius: 30px;
+    color: var(--grey);
+    text-align: center;
+    padding-top: 15px;
+    font-size: 16px; /* INCREASED */
+}
+
+a .universal {
+    color: var(--grey-dark);
+}
+
+/*.Greydivoverlay{
+    align-content: center;
+    width: 100%;
+}*/
+
+.contentDSVDiv02{
+    align-items: center;
+    text-align: center;
+    font-size: 18px; /* INCREASED */
+}
+
+.DemandPolution66C {
+    text-align: left;
+    width: 100%;
+    margin-right: 30px;
+    font-size: 17px; /* INCREASED */
+}
+
+/* Capsulator Class */
+.capsulator01 {
+    font-size: 24px; /* INCREASED */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Form Labels & Input Text */
+label, input, select, textarea {
+    font-size: 16px; /* INCREASED */
+}
+
+/* Placeholder Text */
+::placeholder {
+    font-size: 15px; /* INCREASED */
+    color: #888;
+}
+
+/* RESPONSIVE BREAKPOINTS */
+
+/* 240px & 320px (Small Phones) */
+@media screen and (min-width: 240px) {
+    .logoImg { max-width: 50%; }
+    .container, .containerAccount { width: 100%; }
+    .DemandPolution66 { width: 100%; margin-bottom: 20px; text-align: center; align-items: center;}
+    .DemandPolution66b { width: 100%; margin-bottom: 20px; text-align: center; align-items: center; }
+    .contentDSVDiv03{ text-align: left;}
+    .middleDiv02{ align-content: center;}
+    body { font-size: 16px; } /* Slightly smaller on phones but still accessible */
+    h1 { font-size: 28px; }
+    h2 { font-size: 24px; }
+    h3 { font-size: 20px; }
+    .navMenuDiv {width: 240px;}
+    .aramidelogoimg { width: 240px;}
+}
+
+
+@media screen and (min-width: 320px) {
+    body { font-size: 16px; }
+    h1 { font-size: 30px; }
+    h2 { font-size: 26px; }
+    .navMenuDiv { width: 320px;}
+    .aramidelogoimg { width: 320px;}
+    .logoImg { max-width: 55%; }
+}
+
+
+/* 480px (Large Phones) */
+@media screen and (min-width: 480px) {
+    .logoImg { max-width: 60%; }
+    .DemandPolution66 { width: 45%; text-align: center; align-items: center;}
+    .DemandPolution66b { width: 45%; text-align: center; align-items: center;}
+    .contentDSVDiv03{ align-items: center; display: flex; justify-content: space-between;}
+    body { font-size: 17px; }
+    h1 { font-size: 34px; }
+    h2 { font-size: 28px; }
+    .navMenuDiv { width: 480px;}
+    .aramidelogoimg { width: 480px;} 
+
+}
+
+/* 768px (Tablets) */
+@media screen and (min-width: 768px) {
+    .logoImg { max-width: 70%; }
+    .contentDSVDiv02 { display: flex; flex-wrap: wrap; justify-content: space-around;}
+    .DemandPolution66 { width: 45%; text-align: center; align-items: center;}
+    .DemandPolution66b { width: 45%; text-align: center; align-items: center;}
+    .ButtonStyle { width: auto; }
+    .contentDSVDiv03{ align-items: center; display: flex; justify-content: space-between;}
+    body { font-size: 18px; }
+    h1 { font-size: 38px; }
+    h2 { font-size: 32px; }
+}
+
+/* 1000px (Laptops) */
+@media screen and (min-width: 1000px) {
+    .logoImg { max-width: 80%; }
+    .container { width: 960px; }
+    .DemandPolution66{ width: 33%; text-align: center; align-items: center;}
+    .DemandPolution66b { width: 33%; text-align: center; align-items: center;}
+    .contentDSVDiv03{ align-items: center; display: flex; justify-content: space-between;}
+    body { font-size: 18px; }
+    h1 { font-size: 42px; }
+    h2 { font-size: 34px; }
+}
+
+/* 1260px (Desktop) */
+@media screen and (min-width: 1260px) {
+    .logoImg { max-width: 80%; }
+    .container { width: 1200px; }
+    .DemandPolution66 { width: 24%; text-align: center; align-items: center;}
+    .DemandPolution66b{ width: 24%; text-align: center; align-items: center;}
+    .contentDSVDiv03{ align-items: center; display: flex; justify-content: space-between;}
+    body { font-size: 19px; }
+    h1 { font-size: 46px; }
+    h2 { font-size: 36px; }
+    h3 { font-size: 28px; }
+}
+
+/* 1420px (Widescreen) */
+@media screen and (min-width: 1420px) {
+    .logoImg { max-width: 90%; }
+    .container { width: 1380px; }
+    body { font-size: 20px; }
+    .DemandPolution66 { width: 24%; text-align: center; align-items: center;}
+    .DemandPolution66b{ width: 24%; text-align: center; align-items: center;}
+    .contentDSVDiv03{ align-items: center; display: flex; justify-content: space-between;}
+    h1 { font-size: 52px; }
+    h2 { font-size: 40px; }
+    h3 { font-size: 32px; }
+    p, li, .a234ASDWE22, .a234ASDWER {
+        font-size: 20px;
+    }
+    .ButtonStyle {
+        font-size: 20px;
+        padding: 18px 36px;
+    }
+    .formAccountStyle, .formAccountStylepassword {
+        font-size: 18px;
+        padding: 16px;
+    }
+}
+
+/* In your main2.css or home page style */
+.navMenuDiv .NAVtEXT001 a {
+    transition: all 0.3s ease;
+}
+
+.navMenuDiv .NAVtEXT001 a:hover {
+    opacity: 0.8;
+}
+
+/* Signout button style */
+.navMenuDiv .NAVtEXT001 a[href*="logout"] {
+    color:  var(--lemon-green) !important;
+}
+
+.navMenuDiv .NAVtEXT001 a[href*="logout"]:hover {
+    color: #ffffff !important;
+}
+
+/* Username display */
+.user-greeting {
+    color: #4ecdc4;
+    font-weight: bold;
+    padding: 5px 10px;
+    border: 1px solid #4ecdc4;
+    border-radius: 20px;
+}

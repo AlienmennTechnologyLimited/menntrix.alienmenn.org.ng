@@ -1,0 +1,33 @@
+{% extends "base/shell_nofooter.html" %}
+{% load static %}
+
+{% block title %}Menu — MENNTRIX{% endblock %}
+
+{% block content %}
+
+<div class="menntrix-menu-wrap">
+
+    <div class="a234ASDWER"><strong>MENNTRIX</strong></div>
+    <div class="a234ASDWE22"><a href="{% url 'dashboard' %}">DASHBOARD</a></div>
+    <div class="a234ASDWE22"><a href="{% url 'message_inbox' %}">MESSAGE</a></div>
+    <div class="a234ASDWE22"><a href="{% url 'call_history' %}">CALL HISTORY</a></div>
+    <div class="a234ASDWE22"><a href="#">CHANNEL</a></div>
+    <div class="a234ASDWE22"><a href="{% url 'meeting_list' %}">MEETINGS</a></div>
+        <div class="a234ASDWE22"><a href="{% url 'people_search' %}">PEOPLE</a></div>
+    <div class="a234ASDWE22"><a href="{% url 'connection_list' %}">CONNECTIONS</a></div>
+    <div class="a234ASDWE22"><a href="{% url 'new_members' %}">NEW MEMBERS</a></div>
+    <div class="a234ASDWER"><strong>SETTINGS</strong></div>
+    <div class="a234ASDWE22"><a href="{% url 'setting' %}">SETTING</a></div>
+    <div class="a234ASDWE22"><a href="{% url 'account' %}">ACCOUNT</a></div>
+    <div class="a234ASDWE22"><a href="{% url 'personalinfo' %}">PERSONAL INFORMATION</a></div>
+    <div class="a234ASDWE22"><a href="{% url 'payment' %}">PAYMENT INFORMATION</a></div>
+    <div class="a234ASDWE22"><a href="{% url 'security' %}">PASSWORD &amp; SECURITY</a></div>
+    <div class="a234ASDWE22"><a href="{% url 'profile_picture' %}">PROFILE PICTURE</a></div>
+
+    <div class="a234ASDWER"><strong>MORE</strong></div>
+    <div class="a234ASDWE22"><a href="{% url 'home' %}">HOME</a></div>
+    <div class="a234ASDWE22"><a href="{% url 'logout' %}" onclick="return confirm('Sign out of MENNTRIX?')">LOGOUT</a></div>
+
+</div>
+
+{% endblock %}

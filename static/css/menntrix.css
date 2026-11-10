@@ -1,0 +1,262 @@
+/* ============================================================
+   MENNTRIX — base layer
+   Arial. Normal weights. Dark theme. Consistent radius.
+   Layered on top of main2.css and app-Launcher.css.
+   ============================================================ */
+
+:root {
+    --menntrix-radius-pill: 30px;
+    --menntrix-radius-card: 15px;
+    --menntrix-radius-input: 8px;
+    --menntrix-radius-modal: 20px;
+    --menntrix-glow: 0 0 20px rgba(204, 255, 0, 0.25);
+    --menntrix-bg: #1a1a1a;
+    --menntrix-panel: #232323;
+    --menntrix-panel-hi: #2c2c2c;
+    --menntrix-border: #333;
+}
+
+/* ============================================================
+   PUBLIC PAGES (home / index / signin / signup) keep the
+   main2.css look. These styles only apply to MENNTRIX
+   app-specific wrappers.
+   ============================================================ */
+
+/* ---------- FORM WRAP (used by public forms and app forms) ---------- */
+.menntrix-form-wrap {
+    max-width: 620px;
+    margin: 30px auto;
+    background: var(--menntrix-panel);
+    padding: 32px 28px;
+    border-radius: var(--menntrix-radius-card);
+    border: 1px solid var(--menntrix-border);
+    font-family: Arial, Helvetica, sans-serif;
+}
+.menntrix-form-title {
+    color: var(--lemon-green, #ccff00);
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-align: center;
+    margin: 0 0 8px;
+}
+.menntrix-form-sub {
+    text-align: center;
+    color: #ccc;
+    font-size: 14px;
+    margin-bottom: 24px;
+}
+
+/* ---------- STANDARD FIELDS (app-wide) ---------- */
+.formAccountStyle,
+.formAccountStylepassword {
+    width: 100%;
+    padding: 12px 14px;
+    margin: 8px 0;
+    background: #fff;
+    border: 1px solid var(--lemon-green, #ccff00);
+    color: #1a1a1a;
+    border-radius: var(--menntrix-radius-input);
+    font-size: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.formAccountStyle:focus,
+.formAccountStylepassword:focus {
+    outline: none;
+    box-shadow: var(--menntrix-glow);
+}
+
+.ButtonStyle {
+    background: var(--lemon-green, #ccff00);
+    color: #1a1a1a;
+    border: none;
+    padding: 12px 26px;
+    font-size: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: var(--menntrix-radius-pill);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.ButtonStyle:hover {
+    background: #fff;
+    box-shadow: var(--menntrix-glow);
+}
+
+/* ---------- SPLASH (index.html only) ---------- */
+.menntrix-splash {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.menntrix-splash-inner { max-width: 700px; }
+.menntrix-logo-text {
+    font-size: 56px;
+    letter-spacing: 4px;
+    color: var(--lemon-green, #ccff00);
+    font-weight: 400;
+    margin: 0;
+}
+.menntrix-slogan {
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: #fff;
+    margin-top: 8px;
+}
+.menntrix-tag {
+    color: #ccc;
+    font-size: 16px;
+    margin-top: 16px;
+}
+.menntrix-splash-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 32px;
+}
+.menntrix-open-note {
+    margin-top: 24px;
+    color: var(--lemon-green, #ccff00);
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+/* ---------- HERO (home.html only) ---------- */
+.menntrix-hero {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    padding: 30px 0;
+    flex-wrap: wrap;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.menntrix-hero-left { flex: 1 1 420px; }
+.menntrix-hero-right { flex: 1 1 300px; display: flex; justify-content: center; }
+.menntrix-hero-copy { font-size: 17px; line-height: 1.6; color: #e0e0e0; margin-top: 14px; }
+.menntrix-hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 22px; }
+.menntrix-hero-art {
+    background: var(--menntrix-panel);
+    border: 1px solid var(--lemon-green, #ccff00);
+    border-radius: var(--menntrix-radius-card);
+    padding: 40px 30px;
+    text-align: center;
+    min-width: 260px;
+}
+.menntrix-hero-badge {
+    font-size: 32px;
+    color: var(--lemon-green, #ccff00);
+    letter-spacing: 3px;
+}
+.menntrix-hero-artline {
+    margin-top: 14px;
+    font-size: 15px;
+    color: #fff;
+}
+
+/* ---------- FEATURES (home.html only) ---------- */
+.menntrix-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+    margin: 40px 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.menntrix-feature {
+    background: var(--menntrix-panel);
+    border: 1px solid var(--menntrix-border);
+    border-radius: var(--menntrix-radius-card);
+    padding: 24px 20px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+.menntrix-feature:hover {
+    border-color: var(--lemon-green, #ccff00);
+    box-shadow: var(--menntrix-glow);
+}
+.menntrix-feature-icon {
+    color: var(--lemon-green, #ccff00);
+    margin-bottom: 12px;
+    display: inline-block;
+}
+.menntrix-feature-icon svg {
+    width: 32px;
+    height: 32px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    display: block;
+    margin: 0 auto;
+}
+.menntrix-feature h3 {
+    color: #fff;
+    font-size: 16px;
+    margin: 8px 0;
+    letter-spacing: 0.5px;
+}
+.menntrix-feature p {
+    color: #b8b8b8;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ---------- SIMPLE NOTE (home.html only) ---------- */
+.menntrix-simple-note {
+    text-align: center;
+    padding: 40px 20px;
+    background: var(--menntrix-panel);
+    border-radius: var(--menntrix-radius-card);
+    border: 1px solid var(--menntrix-border);
+    margin: 30px 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.menntrix-simple-note h2 {
+    color: var(--lemon-green, #ccff00);
+    font-size: 24px;
+    letter-spacing: 1px;
+    font-weight: 400;
+}
+.menntrix-simple-note p {
+    color: #e0e0e0;
+    font-size: 15px;
+    margin-top: 8px;
+}
+
+/* ---------- ERROR / SUCCESS ---------- */
+.error-message {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.08);
+    padding: 10px 14px;
+    border-radius: var(--menntrix-radius-input);
+    border-left: 3px solid #ff6b6b;
+    font-size: 14px;
+    margin: 10px 0;
+}
+.success-message {
+    color: #4CAF50;
+    background: rgba(76, 175, 80, 0.08);
+    padding: 10px 14px;
+    border-radius: var(--menntrix-radius-input);
+    border-left: 3px solid #4CAF50;
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+/* ---------- RESPONSIVE (public pages) ---------- */
+@media (max-width: 768px) {
+    .menntrix-logo-text { font-size: 38px; letter-spacing: 2px; }
+    .menntrix-slogan { font-size: 13px; }
+    .menntrix-hero { gap: 20px; }
+    .menntrix-hero-copy { font-size: 15px; }
+    .menntrix-hero-art { padding: 30px 18px; }
+    .menntrix-hero-badge { font-size: 24px; }
+    .menntrix-simple-note h2 { font-size: 20px; }
+    .menntrix-form-wrap { padding: 22px 18px; margin: 20px auto; }
+    .menntrix-form-title { font-size: 18px; }
+}

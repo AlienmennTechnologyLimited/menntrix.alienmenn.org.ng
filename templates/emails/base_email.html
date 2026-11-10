@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>{% block title %}MENNTRIX{% endblock %}</title>
+</head>
+<body style="margin:0;padding:0;background:#1a1a1a;font-family:Arial,Helvetica,sans-serif;color:#ffffff;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#1a1a1a;padding:30px 12px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background:#232323;border:1px solid #333;border-radius:12px;overflow:hidden;">
+                    <!-- Header -->
+                    <tr>
+                        <td style="padding:22px 26px;border-bottom:1px solid #333;">
+                            <span style="font-size:18px;letter-spacing:2px;color:#ccff00;">MENNTRIX</span>
+                            <span style="float:right;font-size:12px;color:#888;letter-spacing:1px;">
+                                {% block category %}NOTIFICATION{% endblock %}
+                            </span>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding:28px 26px;">
+                            {% block content %}{% endblock %}
+                        </td>
+                    </tr>
+
+                    <!-- CTA -->
+                    {% block cta %}{% endblock %}
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding:20px 26px;border-top:1px solid #333;color:#888;font-size:12px;line-height:1.6;">
+                            You're receiving this because you have a MENNTRIX account.<br>
+                            &copy; MENNTRIX — THE MENNTRIX OPENSOURCE PROJECT. All rights reserved.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

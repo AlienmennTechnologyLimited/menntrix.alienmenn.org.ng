@@ -1,0 +1,41 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Create Group — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">CREATE GROUP</h1>
+<p class="mnx-sub">Give it a name, then pick who you want in it.</p>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <label class="mnx-field-label">Group name</label>
+    <input type="text" name="name" required maxlength="150" class="formAccountStyle"
+           placeholder="e.g. Family, Work Team, Church Group">
+
+    <label class="mnx-field-label">Add members (optional — Ctrl/Cmd-click to multi-select)</label>
+    <select name="member_ids" multiple class="formAccountStyle" style="height:220px;">
+        {% for u in all_users %}
+            <option value="{{ u.id }}">
+                @{{ u.username }} — {{ u.firstname }} {{ u.lastname }}
+            </option>
+        {% empty %}
+            <option disabled>No other users yet.</option>
+        {% endfor %}
+    </select>
+
+    <p style="font-size:12px;color:#999;margin-top:6px;">
+        You'll be added automatically as the owner + a member.
+    </p>
+
+    <div style="display:flex;gap:10px;margin-top:20px;">
+        <input type="submit" value="CREATE GROUP" class="ButtonStyle">
+        <a href="{% url 'group_list' %}" class="mnx-btn" style="padding:12px 24px;">CANCEL</a>
+    </div>
+</form>
+{% endblock %}

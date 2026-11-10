@@ -1,0 +1,139 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Compose — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_task_panel.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">COMPOSE MESSAGE</h1>
+<p class="mnx-sub">Write a message and attach text, links, images, video, audio, or files.</p>
+
+<form method="POST" enctype="multipart/form-data" id="composeForm" style="max-width:100%;">
+    {% csrf_token %}
+
+    <label class="mnx-field-label">Recipient mode</label>
+    <select name="mode" id="recipientMode" class="formAccountStyle" onchange="switchMode()">
+        <option value="single" {% if prefill.recipient_id %}selected{% endif %}>Single person</option>
+        <option value="multi">Multiple people</option>
+        <option value="group" {% if prefill.group_id %}selected{% endif %}>Group</option>
+    </select>
+
+    <div id="modeSingle">
+        <label class="mnx-field-label">To</label>
+        <select name="recipient_id" class="formAccountStyle">
+            <option value="">— choose a person —</option>
+            {% for u in all_users %}
+                <option value="{{ u.id }}" {% if prefill.recipient_id == u.id %}selected{% endif %}>
+                    @{{ u.username }} ({{ u.firstname }} {{ u.lastname }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div id="modeMulti" style="display:none;">
+        <label class="mnx-field-label">To (multi-select, Ctrl/Cmd-click)</label>
+        <select name="recipient_ids" multiple class="formAccountStyle" style="height:120px;">
+            {% for u in all_users %}
+                <option value="{{ u.id }}">@{{ u.username }} ({{ u.firstname }} {{ u.lastname }})</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div id="modeGroup" style="display:none;">
+        <label class="mnx-field-label">Group</label>
+        <select name="group_id" class="formAccountStyle">
+            <option value="">— choose a group —</option>
+            {% for g in groups %}
+                <option value="{{ g.id }}" {% if prefill.group_id == g.id %}selected{% endif %}>{{ g.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <label class="mnx-field-label">Subject</label>
+    <input name="subject" type="text" class="formAccountStyle"
+           value="{{ prefill.subject }}" placeholder="Subject">
+
+    <label class="mnx-field-label">Body</label>
+    <textarea name="body" rows="8" class="formAccountStyle"
+              placeholder="Write your message...">{{ prefill.body }}</textarea>
+
+    {# ============ ATTACHMENTS ============ #}
+    <label class="mnx-field-label">Attachments</label>
+
+    <div class="mnx-attach-section">
+
+        {# -- Text snippet -- #}
+        <details class="mnx-attach-block">
+            <summary>📝 Text snippet</summary>
+            <p class="mnx-attach-hint">Paste a code snippet, quote, or short note.</p>
+            <textarea name="text_1" rows="4" class="formAccountStyle"
+                      placeholder="Paste text here..."></textarea>
+        </details>
+
+        {# -- Links -- #}
+        <details class="mnx-attach-block">
+            <summary>🔗 Link</summary>
+            <p class="mnx-attach-hint">Add up to 3 links.</p>
+            <input type="url" name="link_1" class="formAccountStyle"
+                   placeholder="https://example.com" style="margin-bottom:6px;">
+            <input type="url" name="link_2" class="formAccountStyle"
+                   placeholder="https://example.com" style="margin-bottom:6px;">
+            <input type="url" name="link_3" class="formAccountStyle"
+                   placeholder="https://example.com">
+        </details>
+
+        {# -- Image -- #}
+        <details class="mnx-attach-block">
+            <summary>🖼 Image</summary>
+            <p class="mnx-attach-hint">JPG, PNG, GIF, WEBP, SVG.</p>
+            <input type="file" name="attachments" accept="image/*" multiple
+                   class="formAccountStyle">
+        </details>
+
+        {# -- Video -- #}
+        <details class="mnx-attach-block">
+            <summary>🎬 Video</summary>
+            <p class="mnx-attach-hint">MP4, WEBM, MOV.</p>
+            <input type="file" name="attachments" accept="video/*" multiple
+                   class="formAccountStyle">
+        </details>
+
+        {# -- Audio -- #}
+        <details class="mnx-attach-block">
+            <summary>🎵 Audio</summary>
+            <p class="mnx-attach-hint">MP3, WAV, OGG, M4A.</p>
+            <input type="file" name="attachments" accept="audio/*" multiple
+                   class="formAccountStyle">
+        </details>
+
+        {# -- File / ZIP -- #}
+        <details class="mnx-attach-block">
+            <summary>📎 File / ZIP</summary>
+            <p class="mnx-attach-hint">Any file. Recipients get a download link.</p>
+            <input type="file" name="attachments" multiple class="formAccountStyle">
+        </details>
+
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+        <input type="submit" name="action" value="SEND" class="ButtonStyle">
+        <input type="submit" name="action" value="SAVE DRAFT" class="mnx-btn"
+               style="padding:12px 24px;">
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchMode() {
+    const m = document.getElementById('recipientMode').value;
+    document.getElementById('modeSingle').style.display = m === 'single' ? 'block' : 'none';
+    document.getElementById('modeMulti').style.display = m === 'multi' ? 'block' : 'none';
+    document.getElementById('modeGroup').style.display = m === 'group' ? 'block' : 'none';
+}
+document.addEventListener('DOMContentLoaded', switchMode);
+</script>
+{% endblock %}

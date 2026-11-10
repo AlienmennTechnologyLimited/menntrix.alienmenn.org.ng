@@ -1,0 +1,42 @@
+{% extends "base/app_shell.html" %}
+{% load static %}
+
+{% block title %}Password & Security — MENNTRIX{% endblock %}
+
+{% block main_left %}
+{% include "menntrix/_settings_tiles.html" %}
+{% endblock %}
+
+{% block main_right %}
+<h1 class="mnx-greet">PASSWORD &amp; SECURITY</h1>
+<p class="mnx-sub">Change your password. Keep your account safe.</p>
+
+{% include "menntrix/_settings_tabs.html" %}
+
+<div class="mnx-settings-card">
+
+    {% if error_message %}<div class="error-message">{{ error_message }}</div>{% endif %}
+    {% if success_message %}<div class="success-message">{{ success_message }}</div>{% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label class="mnx-field-label">New password (leave blank to keep current)</label>
+        <input name="newpassword" type="password" class="formAccountStylepassword"
+               placeholder="New password (optional)">
+
+        <label class="mnx-field-label">Confirm new password</label>
+        <input name="confirmnewpassword" type="password" class="formAccountStylepassword"
+               placeholder="Repeat new password">
+
+        <label class="mnx-field-label">Current password (required to save)</label>
+        <input name="currentpassword" type="password" required class="formAccountStylepassword"
+               placeholder="Your current password">
+
+        <div style="margin-top:16px;">
+            <input type="submit" value="UPDATE" class="ButtonStyle">
+        </div>
+    </form>
+
+</div>
+{% endblock %}
