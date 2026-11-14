@@ -350,15 +350,22 @@ def call_end(request, call_id):
             except Exception:
                 pass
 
-            peer_id = session.callee_id if request.user.id == session.caller_id else session.caller_id
-            _broadcast_to_user(peer_id, {
+            # Notify BOTH users' global listeners to redirect instantly
+            _broadcast_to_user(session.caller_id, {
                 "type": "call_ended",
                 "call_id": session.call_id,
             })
+            _broadcast_to_user(session.callee_id, {
+                "type": "call_ended",
+                "call_id": session.call_id,
+            })
+            
+            # Notify the call room to cleanup UI
             _broadcast_to_call(session.call_id, {
                 "type": "call.ended",
                 "sender_id": request.user.id,
             })
+            
     return redirect("dashboard")
 
 
@@ -388,11 +395,17 @@ def call_end_ajax(request, call_id):
         except Exception:
             pass
 
-        peer_id = session.callee_id if request.user.id == session.caller_id else session.caller_id
-        _broadcast_to_user(peer_id, {
+        # Notify BOTH users' global listeners to redirect instantly
+        _broadcast_to_user(session.caller_id, {
             "type": "call_ended",
             "call_id": session.call_id,
         })
+        _broadcast_to_user(session.callee_id, {
+            "type": "call_ended",
+            "call_id": session.call_id,
+        })
+        
+        # Notify the call room to cleanup UI
         _broadcast_to_call(session.call_id, {
             "type": "call.ended",
             "sender_id": request.user.id,

@@ -9,6 +9,8 @@ from django.db.models import Q
 from django.utils import timezone
 from .models import Channel, ChannelComment, ChannelStreamSession, ChannelSubscription
 from .models import make_slug
+# NEW: TimelinePost for auto-posting broadcast cards to the dashboard feed
+from menntrix_core.models import TimelinePost
 
 
 # ============================================================
@@ -197,6 +199,25 @@ def channel_go_live(request, slug):
         ch.ended_at = None
         ch.save()
 
+        # Auto-post a "broadcast" card to the dashboard feed.
+        # Guard against duplicate posts if the button is clicked twice
+        # within a short window (e.g. double-click or page refresh).
+        recent_cutoff = timezone.now() - timezone.timedelta(minutes=1)
+        existing = TimelinePost.objects.filter(
+            author=request.user,
+            post_type="broadcast",
+            linked_id=str(ch.slug),
+            created_at__gte=recent_cutoff,
+        ).exists()
+        if not existing:
+            TimelinePost.objects.create(
+                author=request.user,
+                post_type="broadcast",
+                content=f"I'm live now on @{ch.slug}! Tap to watch.",
+                linked_id=str(ch.slug),
+                linked_title=ch.title,
+            )
+
         # Broadcast live state to all WS viewers
         from asgiref.sync import async_to_sync
         from channels.layers import get_channel_layer
@@ -241,6 +262,14 @@ def channel_end_stream(request, slug):
         ChannelStreamSession.objects.filter(
             channel=ch, ended_at__isnull=True
         ).update(ended_at=timezone.now())
+
+        # Remove the auto-posted "I'm live" broadcast card from the feed
+        # so users don't see a stale LIVE badge after the stream has ended.
+        TimelinePost.objects.filter(
+            author=request.user,
+            post_type="broadcast",
+            linked_id=str(ch.slug),
+        ).delete()
 
         # Broadcast ended state to all WS viewers
         from asgiref.sync import async_to_sync

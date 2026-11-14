@@ -1,0 +1,60 @@
+{% load static %}
+{% for post in posts %}
+<div class="mnx-timeline-card">
+    <div class="mnx-tl-header">
+        <div class="mnx-row-avatar">
+            {% if post.author.profile_picture_menntrix %}
+                <img src="{{ MEDIA_URL }}profile_pictures/{{ post.author.profile_picture_menntrix }}" alt="">
+            {% endif %}
+        </div>
+        <div class="mnx-tl-meta">
+            <a href="{% url 'profile_view' post.author.id %}" class="mnx-tl-name">
+                {{ post.author.firstname|default:post.author.username }}
+            </a>
+            <span class="mnx-tl-time">{{ post.created_at|timesince }} ago · {{ post.get_post_type_display }}</span>
+        </div>
+    </div>
+
+    <div class="mnx-tl-body">
+        {% if post.content %}<p>{{ post.content }}</p>{% endif %}
+        
+        {% if post.post_type == 'selfie' and post.image %}
+            <img src="{{ post.image.url }}" class="mnx-tl-image" alt="Selfie">
+        {% endif %}
+        
+        {% if post.post_type == 'event' %}
+            <div class="mnx-tl-event-box">
+                <div class="mnx-tl-event-icon">📅</div>
+                <div>
+                    <strong>{{ post.linked_title|default:"Live Event" }}</strong>
+                    <span>Meeting Event</span>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if post.post_type == 'broadcast' %}
+            <div class="mnx-tl-event-box" style="border-color:#ff3b3b;">
+                <div class="mnx-tl-event-icon" style="color:#ff3b3b;">📡</div>
+                <div>
+                    <strong>{{ post.linked_title|default:"Live Broadcast" }}</strong>
+                    <span style="color:#ff3b3b;">Channel Stream</span>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="mnx-tl-actions">
+        {% if post.post_type == 'selfie' %}
+            {% if post.author.id != user.id %}
+                <a href="{% url 'connection_add' post.author.id %}?next=/dashboard/" class="mnx-btn mnx-btn-primary" style="padding:6px 12px;font-size:11px;">CONNECT</a>
+            {% endif %}
+        {% elif post.post_type == 'event' %}
+            <a href="{% url 'meeting_room' post.linked_id %}" class="mnx-btn mnx-btn-primary" style="padding:6px 12px;font-size:11px;">JOIN MEETING</a>
+        {% elif post.post_type == 'broadcast' %}
+            <a href="{% url 'channel_watch' post.linked_id %}" class="mnx-btn mnx-btn-primary" style="padding:6px 12px;font-size:11px;">WATCH CHANNEL</a>
+        {% endif %}
+    </div>
+</div>
+{% empty %}
+<div class="mnx-empty">No posts yet. Be the first to share something!</div>
+{% endfor %}

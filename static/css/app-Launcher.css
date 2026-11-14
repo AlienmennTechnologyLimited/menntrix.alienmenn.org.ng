@@ -38,8 +38,8 @@
 .app-launcher-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 9998;
+    background: rgba(0, 0, 0, 0.85); /* Darker overlay */
+    z-index: 99998;
     display: none;
 }
 
@@ -54,13 +54,13 @@
     right: 0;
     width: 520px;
     max-width: 95vw;
-    background: var(--grey-panel);
+    background: var(--grey-dark, #1a1a1a); /* Solid dark background */
     border-radius: 20px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-    z-index: 9999;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8); /* Stronger shadow */
+    z-index: 99999; /* Ensure it's on top of everything */
     display: none;
     overflow: hidden;
-    border: 1px solid var(--grey-border);
+    border: 1px solid var(--grey-border, #333);
 }
 
 .app-launcher-menu.show {

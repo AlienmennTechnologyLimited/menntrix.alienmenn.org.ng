@@ -1940,3 +1940,107 @@ body.mnx-app-body a:hover { text-decoration: underline; }
     position: relative;
     z-index: 2;
 }
+
+/* ============================================================
+   TIMELINE & DASHBOARD FEED
+   ============================================================ */
+
+.mnx-timeline-card {
+    background: var(--mnx-bg-2);
+    border: 1px solid var(--mnx-border);
+    border-radius: var(--mnx-radius);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.mnx-tl-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.mnx-tl-name {
+    color: #fff;
+    font-weight: bold;
+    font-size: 14px;
+    display: block;
+    text-decoration: none;
+}
+.mnx-tl-name:hover { color: var(--mnx-accent); text-decoration: none; }
+
+.mnx-tl-time {
+    color: #888;
+    font-size: 11px;
+    display: block;
+}
+
+.mnx-tl-body p {
+    color: #e0e0e0;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 12px 0;
+}
+
+.mnx-tl-image {
+    width: 100%;
+    border-radius: var(--mnx-radius);
+    margin-top: 8px;
+    border: 1px solid #333;
+    object-fit: cover;
+    max-height: 500px;
+}
+
+.mnx-tl-event-box {
+    background: #1a1a1a;
+    border: 1px solid var(--mnx-accent);
+    border-radius: var(--mnx-radius);
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.mnx-tl-event-icon { font-size: 24px; }
+.mnx-tl-event-box strong { display: block; color: #fff; font-size: 14px; }
+.mnx-tl-event-box span { color: #888; font-size: 12px; }
+
+.mnx-tl-actions {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #2a2a2a;
+    display: flex;
+    gap: 8px;
+}
+
+/* Post Composer */
+.mnx-composer {
+    background: var(--mnx-bg-2);
+    border: 1px solid var(--mnx-border);
+    border-radius: var(--mnx-radius);
+    padding: 16px;
+    margin-bottom: 24px;
+}
+.mnx-composer-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 8px;
+}
+.mnx-composer-tab {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: var(--mnx-radius-pill);
+    transition: all 0.15s ease;
+}
+.mnx-composer-tab:hover { color: #fff; }
+.mnx-composer-tab.active {
+    background: rgba(204,255,0,0.1);
+    color: var(--mnx-accent);
+}

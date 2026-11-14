@@ -161,10 +161,19 @@
                     }
                     break;
                 case 'call_accepted':
-                    // used by caller side (callinit.js); ignore here
+                    // Caller side: if they are waiting on the ringing bar, this is handled by callinit.js
                     break;
                 case 'call_rejected':
-                    // used by caller side; ignore here
+                    // Caller side: handled by callinit.js
+                    break;
+                case 'call_ended':
+                    // If we are currently IN the call room, instantly redirect to dashboard
+                    if (window.location.pathname.includes('/call/')) {
+                        window.location.href = '/dashboard/';
+                    } else {
+                        // Otherwise just clear any incoming call card
+                        hideCard();
+                    }
                     break;
             }
         };

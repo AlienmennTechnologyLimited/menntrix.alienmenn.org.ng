@@ -3,11 +3,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.http import JsonResponse
-from .models import SecurityLog, UserLocation
+from django.core.paginator import Paginator
+from django.template.loader import render_to_string
+from .models import SecurityLog, UserLocation, Notification, ActivityLog, PushSubscription, TimelinePost
 from .location_utils import get_client_ip, lookup_ip
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from .models import Notification, ActivityLog, PushSubscription
+from menntrix_meetings.models import Meeting
+from menntrix_channels.models import Channel
 
 
 # ============================================================
@@ -16,13 +17,71 @@ from .models import Notification, ActivityLog, PushSubscription
 
 @login_required
 def dashboard(request):
+    # --- Create Post Logic ---
+    if request.method == 'POST':
+        post_type = request.POST.get('post_type', 'selfie')
+
+        # Only allow known post types (prevents junk data)
+        valid_types = {'selfie', 'event', 'broadcast', 'text'}
+        if post_type not in valid_types:
+            post_type = 'text'
+
+        content = request.POST.get('content', '')
+        linked_id = request.POST.get('linked_id', '')
+        linked_title = request.POST.get('linked_title', '')
+
+        post = TimelinePost(
+            author=request.user,
+            post_type=post_type,
+            content=content,
+            linked_id=linked_id,
+            linked_title=linked_title,
+        )
+
+        if post_type == 'selfie' and request.FILES.get('image'):
+            post.image = request.FILES['image']
+
+        post.save()
+        return redirect('dashboard')
+
+    # --- Feed Logic ---
+    feed_qs = TimelinePost.objects.select_related('author').order_by('-created_at')
+    # ... rest unchanged ...
+
+    
+    # AJAX infinite scroll request
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        page_number = request.GET.get('page', 1)
+        paginator = Paginator(feed_qs, 10)
+        page_obj = paginator.get_page(page_number)
+        
+        html = render_to_string('menntrix/_timeline_cards.html', {'posts': page_obj, 'user': request.user}, request=request)
+        return JsonResponse({
+            'html': html,
+            'has_next': page_obj.has_next(),
+            'next_page': page_obj.next_page_number() if page_obj.has_next() else None,
+        })
+
+    # Initial Load
+    paginator = Paginator(feed_qs, 10)
+    page_obj = paginator.get_page(1)
+    
+    # Data for the Composer
+    my_meetings = Meeting.objects.filter(host=request.user, is_active=True)
+    my_channels = Channel.objects.filter(owner=request.user, is_active=True)
+    
+    # Recent Activity for the left column
     recent_activity = (
         ActivityLog.objects
         .filter(user=request.user)
         .order_by("-created_at")[:5]
     )
+
     return render(request, "menntrix/dashboard.html", {
         "recent_activity": recent_activity,
+        "posts": page_obj,
+        "my_meetings": my_meetings,
+        "my_channels": my_channels,
     })
 
 
@@ -112,7 +171,6 @@ def security(request):
             request.user.save()
             update_session_auth_hash(request, request.user)
 
-            # Security log entry
             SecurityLog.objects.create(
                 user=request.user,
                 event_type="password_change",
@@ -125,19 +183,18 @@ def security(request):
             msg["success_message"] = "No changes made."
     return render(request, "menntrix/security.html", msg)
 
+
 @login_required
 def profile_picture(request):
     msg = {}
     if request.method == "POST" and request.FILES.get("filename"):
         f = request.FILES["filename"]
 
-        # Validate extension
         ext = os.path.splitext(f.name)[1].lower()
         if ext not in {".jpg", ".jpeg", ".png", ".gif", ".webp"}:
             msg["error_message"] = "Only JPG, PNG, GIF, or WEBP allowed."
             return render(request, "menntrix/profile_picture.html", msg)
 
-        # Save file with a safe unique name
         import uuid
         from django.core.files.storage import default_storage
         from django.core.files.base import ContentFile
@@ -148,7 +205,6 @@ def profile_picture(request):
             ContentFile(f.read()),
         )
 
-        # Store just the filename in the model
         request.user.profile_picture_menntrix = safe_name
         request.user.save(update_fields=["profile_picture_menntrix"])
 
@@ -156,13 +212,13 @@ def profile_picture(request):
 
     return render(request, "menntrix/profile_picture.html", msg)
 
+
 # ============================================================
-# HEARTBEAT — location ping (15 min interval, client-driven)
+# HEARTBEAT — location ping
 # ============================================================
 
 @login_required
 def heartbeat(request):
-    """Client posts lat/lng every 15 min if geolocation is granted."""
     if request.method != "POST":
         return JsonResponse({"ok": False, "error": "POST required"}, status=405)
 
@@ -197,7 +253,8 @@ def heartbeat(request):
     )
     return JsonResponse({"ok": True})
 
-    # ============================================================
+
+# ============================================================
 # NOTIFICATIONS
 # ============================================================
 
@@ -340,18 +397,13 @@ def push_unsubscribe(request):
         PushSubscription.objects.filter(user=request.user, endpoint=endpoint).update(is_active=False)
     return JsonResponse({"ok": True})
 
-    # ============================================================
+
+# ============================================================
 # SHARE LINKS
 # ============================================================
+
 @login_required
 def share_link(request, kind, pk):
-    """
-    Return shareable info for a channel, meeting, call, or user profile.
-    GET /share/channel/alienmenn/
-    GET /share/meeting/<uuid>/
-    GET /share/call/<call_id>/
-    GET /share/profile/<user_id>/
-    """
     from django.urls import reverse
     from menntrix_channels.models import Channel
     from menntrix_meetings.models import Meeting

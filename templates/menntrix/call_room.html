@@ -16,9 +16,6 @@
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ============================================================
-// MENNTRIX CALL ROOM
-// ============================================================
 const CALL_ID = "{{ session.call_id }}";
 const USER_ID = {{ user.id }};
 const PEER_ID = {{ peer.id }};
@@ -44,7 +41,6 @@ function getCookie(name) {
     return m ? decodeURIComponent(m[2]) : '';
 }
 
-// ---------- Heartbeat ----------
 function startPing() {
     const send = () => {
         fetch(`/call/${CALL_ID}/ping/`, {
@@ -59,7 +55,6 @@ function stopPing() {
     if (pingTimer) { clearInterval(pingTimer); pingTimer = null; }
 }
 
-// ---------- Clean end call on page hide (CSRF-safe) ----------
 window.addEventListener('pagehide', () => {
     if (ended) return;
     const csrf = getCookie('csrftoken') || '';
@@ -70,7 +65,6 @@ window.addEventListener('pagehide', () => {
     }).catch(() => {});
 });
 
-// ---------- UI ----------
 function buildCallUI() {
     const mainEl = document.querySelector('.mnx-main');
     if (!mainEl) return;
@@ -162,7 +156,6 @@ async function init() {
     startPing();
 
     const localVideo = document.getElementById('localVideo');
-    const remoteVideo = document.getElementById('remoteVideo');
     const callStatus = document.getElementById('callStatus');
 
     const constraints = CALL_TYPE === "video"
@@ -184,7 +177,13 @@ async function init() {
     ws = new WebSocket(`${wsScheme}://${window.location.host}/ws/call/${CALL_ID}/`);
     ws.onopen = () => { callStatus.textContent = "Ringing…"; };
     ws.onmessage = handleSignalMessage;
-    ws.onclose = () => { callStatus.textContent = "Disconnected"; };
+    
+    ws.onclose = () => { 
+        if (!ended) {
+            ended = true;
+            window.location.href = "{% url 'dashboard' %}";
+        }
+    };
 
     document.getElementById('btnEnd').onclick = endCall;
     document.getElementById('btnMic').onclick = toggleMic;
@@ -216,17 +215,8 @@ function handleSignalMessage(event) {
         case "chat": appendChat(data.username, data.text); break;
         case "location": showPeerLocation(data.lat, data.lng); break;
         case "peer_leave":
-            // Peer closed their side (tab closed, hung up, network drop)
-            if (ended) return;
-            callStatus.textContent = "Call ended";
-            ended = true;
-            setTimeout(cleanup, 800);
-            break;
         case "call_ended":
-            if (ended) return;
-            callStatus.textContent = "Call ended";
-            ended = true;
-            setTimeout(cleanup, 800);
+            cleanup();
             break;
     }
 }
@@ -352,43 +342,29 @@ function appendChat(username, text) {
 function endCall() {
     if (ended) return;
     ended = true;
-    stopPing();
-
-    // Tell the server we're ending — this broadcasts call.ended to the peer.
-    if (ws && ws.readyState === 1) {
-        ws.send(JSON.stringify({ type: 'end' }));
-    }
-
-    // HTTP fallback — keepalive ensures it flushes even if the page unloads.
-    try {
-        fetch(`/call/${CALL_ID}/end-ajax/`, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': getCookie('csrftoken') },
-            keepalive: true,
-        }).catch(() => {});
-    } catch (e) {}
-
-    // Release media immediately so the camera light turns off.
-    if (pc) { try { pc.close(); } catch (e) {} pc = null; }
-    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-
-    // Redirect instantly — user doesn't wait.
-    window.location.href = "{% url 'dashboard' %}";
+    
+    // 1. Hit the HTTP endpoint (this now broadcasts to BOTH global listeners)
+    fetch(`/call/${CALL_ID}/end-ajax/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        keepalive: true,
+    }).catch(() => {});
+    
+    // 2. Clean up UI and redirect instantly
+    cleanup();
 }
 
 function cleanup() {
+    if (!ws && !pc && !localStream) return; 
+    
     stopPing();
     if (pc) { try { pc.close(); } catch (e) {} pc = null; }
     if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-    // Close the WebSocket in the background so the server can finish
-    // sending peer_leave/call_ended to the other side; don't block on it.
-    setTimeout(() => {
-        if (ws) { try { ws.close(); } catch (e) {} ws = null; }
-    }, 100);
-    // Redirect instantly.
+    if (ws) { try { ws.close(); } catch (e) {} ws = null; }
+    
+    // Redirect instantly
     window.location.href = "{% url 'dashboard' %}";
 }
-
 
 document.addEventListener('DOMContentLoaded', init);
 </script>

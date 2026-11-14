@@ -3,12 +3,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.utils import timezone
 from django.db.models import Q
-from .models import CallSession, CallSignal, CallLocation, CallMessage
+from .models import CallSession, CallLocation, CallMessage
 
-
-# ============================================================
-# 1-to-1 CALL CONSUMER
-# ============================================================
 
 class CallConsumer(AsyncWebsocketConsumer):
 
@@ -29,7 +25,6 @@ class CallConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_group, self.channel_name)
         await self.accept()
 
-        # Mark heartbeat on connect
         await self._touch_heartbeat()
 
         await self.channel_layer.group_send(self.room_group, {
@@ -44,11 +39,33 @@ class CallConsumer(AsyncWebsocketConsumer):
         user = getattr(self, "user", None)
         if user is None:
             return
+
+        # End the call in the database
+        await self._end_call(reason="peer_disconnected")
+        
+        # Tell the call room
+        await self.channel_layer.group_send(self.room_group, {
+            "type": "call.ended",
+            "sender_id": user.id,
+        })
         await self.channel_layer.group_send(self.room_group, {
             "type": "peer.leave",
             "user_id": user.id,
             "username": user.username,
         })
+        
+        # Tell BOTH users' global listeners to redirect instantly
+        call = await self._get_call()
+        if call:
+            await self.channel_layer.group_send(f"user_{call.caller_id}", {
+                "type": "call_ended",
+                "call_id": call.call_id,
+            })
+            await self.channel_layer.group_send(f"user_{call.callee_id}", {
+                "type": "call_ended",
+                "call_id": call.call_id,
+            })
+
         await self.channel_layer.group_discard(self.room_group, self.channel_name)
 
     async def receive(self, text_data):
@@ -97,10 +114,24 @@ class CallConsumer(AsyncWebsocketConsumer):
 
         elif kind == "end":
             await self._end_call(reason="user_hung_up")
+            
+            # Tell the call room to cleanup UI
             await self.channel_layer.group_send(self.room_group, {
                 "type": "call.ended",
                 "sender_id": self.user.id,
             })
+            
+            # Tell BOTH users' global listeners to redirect instantly
+            call = await self._get_call()
+            if call:
+                await self.channel_layer.group_send(f"user_{call.caller_id}", {
+                    "type": "call_ended",
+                    "call_id": call.call_id,
+                })
+                await self.channel_layer.group_send(f"user_{call.callee_id}", {
+                    "type": "call_ended",
+                    "call_id": call.call_id,
+                })
 
     # ---------- group handlers ----------
     async def peer_join(self, event):
@@ -111,9 +142,6 @@ class CallConsumer(AsyncWebsocketConsumer):
         }))
 
     async def peer_leave(self, event):
-        # Skip if this event was triggered by our own disconnect
-        if event.get("user_id") == self.user.id:
-            return
         await self.send(text_data=json.dumps({
             "type": "peer_leave",
             "user_id": event["user_id"],
@@ -163,6 +191,10 @@ class CallConsumer(AsyncWebsocketConsumer):
         ).exists()
 
     @database_sync_to_async
+    def _get_call(self):
+        return CallSession.objects.filter(call_id=self.call_id).first()
+
+    @database_sync_to_async
     def _save_chat(self, text):
         call = CallSession.objects.filter(call_id=self.call_id).first()
         if call:
@@ -194,16 +226,7 @@ class CallConsumer(AsyncWebsocketConsumer):
             call.save()
 
 
-# ============================================================
-# GLOBAL LISTENER — one per open tab, listens for incoming calls
-# ============================================================
-
 class CallListenerConsumer(AsyncWebsocketConsumer):
-    """
-    Every logged-in page opens this. Joins the user to a personal group
-    so the server can push incoming-call events to them.
-    """
-
     async def connect(self):
         user = self.scope.get("user")
         if not user or not user.is_authenticated:
@@ -221,10 +244,7 @@ class CallListenerConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def receive(self, text_data):
-        # listener doesn't need to send anything
         pass
-
-    # ---------- group event handlers ----------
 
     async def incoming_call(self, event):
         await self.send(text_data=json.dumps({

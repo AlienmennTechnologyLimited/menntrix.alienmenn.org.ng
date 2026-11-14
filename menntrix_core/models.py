@@ -1,7 +1,13 @@
+# menntrix_core/models.py
+
 from django.db import models
 from django.conf import settings
 import uuid
 
+
+# ============================================================
+# LOCATION / SECURITY / PRIVACY
+# ============================================================
 
 class UserLocation(models.Model):
     SOURCE_CHOICES = [
@@ -128,7 +134,8 @@ class UserPrivacy(models.Model):
     def __str__(self):
         return f"privacy({self.user_id})"
 
-        # ============================================================
+
+# ============================================================
 # NOTIFICATIONS, EMAIL CONFIG, ACTIVITY LOG, PUSH
 # ============================================================
 
@@ -260,3 +267,56 @@ class PushSubscription(models.Model):
 
     def __str__(self):
         return f"{self.user_id} sub@{self.created_at:%Y-%m-%d}"
+
+
+# ============================================================
+# TIMELINE POSTS (Dashboard Feed)
+# ============================================================
+
+class TimelinePost(models.Model):
+    POST_TYPES = [
+        ("selfie", "Selfie"),
+        ("event", "Event"),
+        ("broadcast", "Broadcast"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="timeline_posts",
+    )
+    post_type = models.CharField(max_length=20, choices=POST_TYPES, default="selfie")
+    content = models.TextField(blank=True)
+
+    # For selfies
+    image = models.ImageField(upload_to="timeline/", blank=True, null=True)
+
+    # For events and broadcasts
+    linked_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Meeting UUID or Channel Slug",
+    )
+    linked_title = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text="Cached title for fast rendering",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # IMPORTANT: matches migration 0003_timelinepost.py
+        # Without this, Django generates an AlterModelTable in 0004.
+        db_table = "menntrix_timeline_post"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["post_type", "linked_id"]),
+            models.Index(fields=["author", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.author_id} {self.post_type} @ {self.created_at:%Y-%m-%d %H:%M}"
